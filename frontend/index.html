@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DemoVault — Safe Demo Hub</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>DemoVault</h1>
+    <nav>
+      <a href="/submit" data-i18n="nav.submit">Submit Demo</a>
+      <button id="lang-toggle" aria-label="Toggle language">KR / EN</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h2 class="hero-title">Submit your AI demo.<br>Discover what others built.</h2>
+    <p class="hero-sub">We run 3 safety checks on every link. Not a guarantee, but a heads-up.</p>
+    <div class="hero-badges">
+      <span>🛡️ Web Risk</span>
+      <span>🔍 Safe Browsing</span>
+      <span>🌐 URLScan</span>
+    </div>
+    <a href="/submit" class="hero-btn">Submit a Demo →</a>
+  </section>
+
+  <main>
+    <div id="state-loading" class="state-box">
+      <div class="spinner"></div>
+      <p data-i18n="gallery.loading">Loading demos...</p>
+    </div>
+
+    <div id="state-error" class="state-box" hidden>
+      <p class="state-icon">⚠️</p>
+      <p data-i18n="gallery.error">Failed to load demos. Is the Worker running?</p>
+      <button id="retry-btn" data-i18n="gallery.retry">Retry</button>
+    </div>
+
+    <div id="state-empty" class="state-box" hidden>
+      <p class="state-icon">📭</p>
+      <p data-i18n="gallery.empty">No demos yet. Be the first to submit!</p>
+      <a href="/submit" data-i18n="nav.submit">Submit Demo</a>
+    </div>
+
+    <section id="gallery" aria-label="Demo gallery"></section>
+  </main>
+
+  <!-- 안전 게이트 모달 -->
+  <div id="gate-modal" class="modal-overlay" hidden>
+    <div class="modal-box">
+      <h2 class="modal-title" data-i18n="modal.title">🔍 Safety Check</h2>
+      <p class="modal-url" id="modal-url-text"></p>
+      <div class="modal-status" id="modal-status">
+        <div class="spinner"></div>
+        <p data-i18n="modal.scanning">Scanning...</p>
+      </div>
+      <div class="modal-result" id="modal-result" hidden></div>
+      <div class="modal-actions">
+        <button id="modal-cancel" data-i18n="modal.cancel">Cancel</button>
+        <button id="modal-proceed" data-i18n="modal.proceed" hidden>Visit →</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="gallery.js"></script>
+</body>
+</html>
