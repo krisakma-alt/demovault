@@ -1,0 +1,11 @@
+# 환경변수 / API 키 — 절대 커밋 금지
+worker/.dev.vars
+
+# 의존성
+node_modules/
+
+# Wrangler 빌드 캐시
+.wrangler/
+
+# Google OAuth 자격증명 — 절대 커밋 금지
+Google admin/
