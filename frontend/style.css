@@ -428,12 +428,18 @@ button[type="submit"]:disabled {
   align-self: flex-start;
 }
 
-/* 카테고리별 색상 */
+/* 카테고리별 색상 (AI 중심) */
+.card-category[data-category="image-gen"]    { background: #fce4ec; color: #880e4f; }
+.card-category[data-category="text-ai"]      { background: #e3f2fd; color: #0d47a1; }
+.card-category[data-category="code-ai"]      { background: #e8f5e9; color: #1b5e20; }
+.card-category[data-category="voice-ai"]     { background: #fff8e1; color: #e65100; }
+.card-category[data-category="video-ai"]     { background: #f3e5f5; color: #4a148c; }
+.card-category[data-category="utility"]      { background: #e2d9f3; color: #4a235a; }
+.card-category[data-category="other"]        { background: #e9ecef; color: #495057; }
+/* 구 카테고리 하위 호환 */
 .card-category[data-category="productivity"] { background: #cce5ff; color: #004085; }
 .card-category[data-category="marketing"]    { background: #fff3cd; color: #856404; }
 .card-category[data-category="ecommerce"]    { background: #d4edda; color: #155724; }
-.card-category[data-category="utility"]      { background: #e2d9f3; color: #4a235a; }
-.card-category[data-category="other"]        { background: #e9ecef; color: #495057; }
 
 /* select 드롭다운 기본 스타일 */
 select {
@@ -514,3 +520,42 @@ select {
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
 }
+
+/* ===== 카테고리 필터 바 ===== */
+.category-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 1.25rem 2rem 0;
+}
+
+.filter-btn {
+  padding: 0.35rem 0.9rem;
+  border: 1px solid #dee2e6;
+  border-radius: 20px;
+  background: #fff;
+  color: #495057;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-btn:hover {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.filter-btn.active {
+  background: #1a1a2e;
+  color: #fff;
+  border-color: #1a1a2e;
+}
+
+/* ===== 카드 클릭수 ===== */
+.card-clicks {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+/* ===== pending 모달 결과 ===== */
+.modal-result.pending { background: #fff3cd; color: #856404; }

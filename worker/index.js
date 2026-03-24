@@ -24,6 +24,7 @@ async function route(request, env) {
 
   if (pathname === '/api/submit'       && method === 'POST')   return handleSubmit(request, env);
   if (pathname === '/api/demos'        && method === 'GET')    return handleListDemos(env);
+  if (pathname === '/api/click'        && method === 'POST')   return handleClick(searchParams, env);
   if (pathname === '/api/rescan'       && method === 'GET')    return handleRescan(searchParams, env);
   if (pathname === '/api/admin/demos'  && method === 'GET')    return handleAdminDemos(env);
   if (pathname === '/api/admin/delete' && method === 'DELETE') return handleAdminDelete(searchParams, env);
@@ -119,6 +120,22 @@ async function handleListDemos(env) {
   );
   demos.sort((a, b) => b.createdAt - a.createdAt);
   return jsonResponse(demos);
+}
+
+// ===== POST /api/click?id= =====
+// 클릭수 카운트 증가 + 캐시된 스캔 결과 즉시 반환 (API 재호출 없음)
+async function handleClick(searchParams, env) {
+  const id = searchParams.get('id');
+  if (!id) return jsonResponse({ error: 'id 파라미터가 필요합니다.' }, 400);
+
+  const raw = await env.DEMOS.get(id);
+  if (!raw) return jsonResponse({ error: '해당 데모를 찾을 수 없습니다.' }, 404);
+
+  const demo = JSON.parse(raw);
+  demo.clickCount = (demo.clickCount ?? 0) + 1;
+  await env.DEMOS.put(id, JSON.stringify(demo));
+
+  return jsonResponse({ scanResult: demo.scanResult, clickCount: demo.clickCount });
 }
 
 async function handleRescan(searchParams, env) {

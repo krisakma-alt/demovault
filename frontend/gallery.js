@@ -4,6 +4,10 @@ const API_BASE = 'https://demovault-worker.krisakma.workers.dev';
 
 const BADGE_CLASS = { safe: 'safe', unsafe: 'unsafe', pending: 'pending' };
 
+// 현재 필터 상태
+let currentFilter = 'all';
+let allDemos = [];
+
 // ===== 진입점: DOMContentLoaded 후 실행 =====
 document.addEventListener('DOMContentLoaded', () => {
   loadGallery();
@@ -18,6 +22,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('modal-cancel')?.addEventListener('click', closeModal);
+
+  // 카테고리 필터 버튼 이벤트
+  document.getElementById('category-filters')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-filter]');
+    if (!btn) return;
+    currentFilter = btn.dataset.filter;
+    document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilter();
+  });
 });
 
 // ===== API fetch + 렌더링 =====
@@ -26,11 +40,10 @@ async function loadGallery() {
   showError(false);
   showEmpty(false);
 
-  let demos;
   try {
     const res = await fetch(`${API_BASE}/api/demos`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    demos = await res.json();
+    allDemos = await res.json();
   } catch (err) {
     console.error('[Gallery] fetch 실패:', err);
     showLoading(false);
@@ -40,12 +53,28 @@ async function loadGallery() {
 
   showLoading(false);
 
-  if (!demos.length) {
+  if (!allDemos.length) {
     showEmpty(true);
     return;
   }
 
-  renderGallery(demos);
+  applyFilter();
+}
+
+// ===== 필터 적용 =====
+function applyFilter() {
+  const filtered = currentFilter === 'all'
+    ? allDemos
+    : allDemos.filter(d => (d.category ?? 'other') === currentFilter);
+
+  if (!filtered.length) {
+    document.getElementById('gallery').innerHTML = '';
+    showEmpty(true);
+    return;
+  }
+
+  showEmpty(false);
+  renderGallery(filtered);
 }
 
 // ===== 카드 목록 렌더링 =====
@@ -57,7 +86,7 @@ function renderGallery(demos) {
 
 // ===== 카드 DOM 생성 =====
 function createCard(demo) {
-  const { id, name, url, desc, category, scanResult, createdAt } = demo;
+  const { id, name, url, desc, category, scanResult, createdAt, clickCount = 0 } = demo;
   const overall  = scanResult?.overall ?? 'pending';
   const details  = scanResult?.details ?? {};
 
@@ -72,6 +101,7 @@ function createCard(demo) {
   const article = document.createElement('article');
   article.className = 'card';
   article.dataset.url = url;
+  article.dataset.id = id;
 
   article.innerHTML = `
     <div class="card-header">
@@ -95,6 +125,7 @@ function createCard(demo) {
 
     <div class="card-footer">
       <span class="card-date">${date}</span>
+      <span class="card-clicks" data-clicks="${id}">👁 ${clickCount}</span>
       <button
         class="card-visit-btn"
         data-i18n-btn="card.visit"
@@ -121,6 +152,7 @@ function createCard(demo) {
 }
 
 // ===== 안전 게이트 모달 =====
+// /api/click을 호출 — 클릭수 카운트 + 캐시된 스캔 결과 즉시 반환 (API 재호출 없음)
 function openGateModal(id, url) {
   const modal      = document.getElementById('gate-modal');
   const urlText    = document.getElementById('modal-url-text');
@@ -138,7 +170,7 @@ function openGateModal(id, url) {
 
   modal.hidden = false;
 
-  fetch(`${API_BASE}/api/rescan?id=${id}`)
+  fetch(`${API_BASE}/api/click?id=${id}`, { method: 'POST' })
     .then(res => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.json();
@@ -146,6 +178,12 @@ function openGateModal(id, url) {
     .then(data => {
       status.hidden = true;
       const overall = data.scanResult?.overall ?? 'error';
+
+      // 카드의 클릭수 즉시 업데이트
+      const clickEl = document.querySelector(`[data-clicks="${id}"]`);
+      if (clickEl && data.clickCount != null) {
+        clickEl.textContent = `👁 ${data.clickCount}`;
+      }
 
       if (overall === 'safe') {
         result.className = 'modal-result safe';
@@ -155,9 +193,18 @@ function openGateModal(id, url) {
           window.open(url, '_blank', 'noopener,noreferrer');
           closeModal();
         };
-      } else {
+      } else if (overall === 'unsafe') {
         result.className = 'modal-result unsafe';
         result.textContent = TRANSLATIONS[currentLang]?.['modal.resultUnsafe'] ?? '✗ 위험한 사이트로 감지되었습니다.';
+      } else {
+        // pending — 검사 아직 완료 안 됐지만 이동은 허용
+        result.className = 'modal-result pending';
+        result.textContent = TRANSLATIONS[currentLang]?.['modal.resultPending'] ?? '⏳ 검사 진행 중입니다. 주의 후 이동하세요.';
+        proceedBtn.hidden = false;
+        proceedBtn.onclick = () => {
+          window.open(url, '_blank', 'noopener,noreferrer');
+          closeModal();
+        };
       }
 
       result.hidden = false;
