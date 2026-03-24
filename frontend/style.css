@@ -559,3 +559,114 @@ select {
 
 /* ===== pending 모달 결과 ===== */
 .modal-result.pending { background: #fff3cd; color: #856404; }
+
+/* ===== 피드백 바 ===== */
+.feedback-bar {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.fb-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  background: #f8f9fa;
+  color: #555;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.fb-btn:hover:not(.voted) {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.fb-btn.voted {
+  background: #1a1a2e;
+  color: #fff;
+  border-color: #1a1a2e;
+  cursor: default;
+}
+
+.fb-count {
+  font-weight: 600;
+}
+
+/* ===== Featured 섹션 (Trending / Just Launched) ===== */
+.featured-section {
+  padding: 1.5rem 2rem 0;
+}
+
+.featured-section[hidden] { display: none; }
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 0.75rem;
+}
+
+.mini-card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+/* ===== 미니 카드 ===== */
+.mini-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mini-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mini-card-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge.mini {
+  font-size: 0.68rem;
+  padding: 0.15rem 0.5rem;
+  cursor: default;
+  pointer-events: none;
+}
+
+.card-visit-btn.mini-visit {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.7rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  align-self: flex-start;
+  background: #1a1a2e;
+  color: #fff;
+}
+
+.card-visit-btn.mini-visit:hover { background: #2e2e5e; }

@@ -25,7 +25,9 @@ async function route(request, env) {
   if (pathname === '/api/submit'       && method === 'POST')   return handleSubmit(request, env);
   if (pathname === '/api/demos'        && method === 'GET')    return handleListDemos(env);
   if (pathname === '/api/click'        && method === 'POST')   return handleClick(searchParams, env);
+  if (pathname === '/api/feedback'     && method === 'POST')   return handleFeedback(searchParams, env);
   if (pathname === '/api/rescan'       && method === 'GET')    return handleRescan(searchParams, env);
+  if (pathname === '/sitemap.xml'      && method === 'GET')    return handleSitemap(env);
   if (pathname === '/api/admin/demos'  && method === 'GET')    return handleAdminDemos(env);
   if (pathname === '/api/admin/delete' && method === 'DELETE') return handleAdminDelete(searchParams, env);
   if (pathname === '/api/admin/update' && method === 'PATCH')  return handleAdminUpdate(request, searchParams, env);
@@ -136,6 +138,54 @@ async function handleClick(searchParams, env) {
   await env.DEMOS.put(id, JSON.stringify(demo));
 
   return jsonResponse({ scanResult: demo.scanResult, clickCount: demo.clickCount });
+}
+
+// ===== POST /api/feedback?id=&type= =====
+// type: tried_it | useful | needs_work
+const VALID_FEEDBACK_TYPES = ['tried_it', 'useful', 'needs_work'];
+
+async function handleFeedback(searchParams, env) {
+  const id   = searchParams.get('id');
+  const type = searchParams.get('type');
+
+  if (!id)   return jsonResponse({ error: 'id 파라미터가 필요합니다.' }, 400);
+  if (!VALID_FEEDBACK_TYPES.includes(type)) {
+    return jsonResponse({ error: 'type은 tried_it | useful | needs_work 중 하나여야 합니다.' }, 400);
+  }
+
+  const raw = await env.DEMOS.get(id);
+  if (!raw) return jsonResponse({ error: '해당 데모를 찾을 수 없습니다.' }, 404);
+
+  const demo = JSON.parse(raw);
+  demo.feedback = demo.feedback ?? { tried_it: 0, useful: 0, needs_work: 0 };
+  demo.feedback[type] = (demo.feedback[type] ?? 0) + 1;
+  await env.DEMOS.put(id, JSON.stringify(demo));
+
+  return jsonResponse({ feedback: demo.feedback });
+}
+
+// ===== GET /sitemap.xml =====
+async function handleSitemap(env) {
+  const { keys } = await env.DEMOS.list();
+  const BASE_URL = 'https://demovault.youngri.org';
+
+  const staticUrls = ['/', '/submit'].map(path => `
+  <url>
+    <loc>${BASE_URL}${path}</loc>
+    <changefreq>daily</changefreq>
+  </url>`).join('');
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${staticUrls}
+</urlset>`;
+
+  return new Response(xml, {
+    headers: {
+      'Content-Type': 'application/xml',
+      'Access-Control-Allow-Origin': '*',
+    },
+  });
 }
 
 async function handleRescan(searchParams, env) {

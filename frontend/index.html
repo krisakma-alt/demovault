@@ -3,7 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DemoVault — Safe Demo Hub</title>
+  <title>DemoVault — Discover AI Demos, Safety Checked</title>
+  <meta name="description" content="Submit your AI demo and let others discover it. Every link is scanned with 3 safety tools before you click. No rankings, no bots." />
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://demovault.youngri.org/" />
+  <meta property="og:title"       content="DemoVault — Discover AI Demos, Safety Checked" />
+  <meta property="og:description" content="An open gallery for AI demos. Every link is scanned with Google Web Risk, Safe Browsing, and URLScan before you visit." />
+  <meta property="og:image"       content="https://demovault.youngri.org/og.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="DemoVault — Discover AI Demos, Safety Checked" />
+  <meta name="twitter:description" content="Submit your AI demo. Every link safety-checked before you click." />
+  <meta name="twitter:image"       content="https://demovault.youngri.org/og.png" />
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "DemoVault",
+    "url": "https://demovault.youngri.org",
+    "description": "An open gallery for AI demos with 3-way safety scanning.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://demovault.youngri.org/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -27,6 +58,18 @@
   </section>
 
   <main>
+    <!-- Trending 섹션 -->
+    <section id="section-trending" class="featured-section" hidden>
+      <h2 class="section-title">🔥 Trending</h2>
+      <div id="trending-list" class="mini-card-list"></div>
+    </section>
+
+    <!-- Just Launched 섹션 -->
+    <section id="section-just-launched" class="featured-section" hidden>
+      <h2 class="section-title">🚀 Just Launched</h2>
+      <div id="just-launched-list" class="mini-card-list"></div>
+    </section>
+
     <!-- 카테고리 필터 -->
     <div id="category-filters" class="category-filters">
       <button class="filter-btn active" data-filter="all">All</button>
@@ -66,7 +109,7 @@
       <p class="modal-url" id="modal-url-text"></p>
       <div class="modal-status" id="modal-status">
         <div class="spinner"></div>
-        <p data-i18n="modal.scanning">Scanning...</p>
+        <p data-i18n="modal.scanning">Checking...</p>
       </div>
       <div class="modal-result" id="modal-result" hidden></div>
       <div class="modal-actions">
