@@ -45,8 +45,9 @@ async function route(request, env) {
 // ===== GET /api/admin/demos =====
 async function handleAdminDemos(env) {
   const { keys } = await env.DEMOS.list();
+  const demoKeys = keys.filter(({ name }) => !name.startsWith('req_'));
   const demos = (await Promise.all(
-    keys.map(({ name: key }) =>
+    demoKeys.map(({ name: key }) =>
       env.DEMOS.get(key).then(raw => raw ? JSON.parse(raw) : null)
     )
   )).filter(Boolean);
@@ -122,11 +123,12 @@ async function handleSubmit(request, env) {
 
 async function handleListDemos(env) {
   const { keys } = await env.DEMOS.list();
-  const demos = await Promise.all(
-    keys.map(({ name: key }) =>
-      env.DEMOS.get(key).then(raw => JSON.parse(raw))
+  const demoKeys = keys.filter(({ name }) => !name.startsWith('req_'));
+  const demos = (await Promise.all(
+    demoKeys.map(({ name: key }) =>
+      env.DEMOS.get(key).then(raw => raw ? JSON.parse(raw) : null)
     )
-  );
+  )).filter(Boolean);
   demos.sort((a, b) => b.createdAt - a.createdAt);
   return jsonResponse(demos);
 }
@@ -176,15 +178,24 @@ async function handleSitemap(env) {
   const { keys } = await env.DEMOS.list();
   const BASE_URL = 'https://demovault.youngri.org';
 
-  const staticUrls = ['/', '/submit'].map(path => `
+  const staticUrls = ['/', '/submit', '/request'].map(path => `
   <url>
     <loc>${BASE_URL}${path}</loc>
     <changefreq>daily</changefreq>
   </url>`).join('');
 
+  // req_ prefix 제외한 데모 개별 페이지
+  const demoKeys = keys.filter(({ name }) => !name.startsWith('req_'));
+  const demoUrls = demoKeys.map(({ name: id }) => `
+  <url>
+    <loc>${BASE_URL}/demo/${id}</loc>
+    <changefreq>weekly</changefreq>
+  </url>`).join('');
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${staticUrls}
+${demoUrls}
 </urlset>`;
 
   return new Response(xml, {
