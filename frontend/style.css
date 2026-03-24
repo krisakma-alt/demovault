@@ -111,52 +111,56 @@ header nav a:hover {
 /* ===== How it works ===== */
 .how-it-works {
   display: flex;
+  flex-direction: row;
   align-items: flex-start;
   justify-content: center;
   gap: 0;
   padding: 2.5rem 2rem;
   background: #fff;
   border-bottom: 1px solid #e9ecef;
-  flex-wrap: wrap;
 }
 
 .hiw-step {
-  flex: 1;
-  min-width: 200px;
-  max-width: 260px;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 280px;
   text-align: center;
   padding: 0.5rem 1.5rem;
 }
 
 .hiw-icon {
   font-size: 2rem;
-  margin-bottom: 0.6rem;
+  display: block;
+  margin-bottom: 0.65rem;
 }
 
 .hiw-step h3 {
   font-size: 0.95rem;
   font-weight: 700;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.45rem;
   color: #1a1a2e;
 }
 
 .hiw-step p {
   font-size: 0.82rem;
   color: #666;
-  line-height: 1.6;
+  line-height: 1.65;
+  margin: 0;
 }
 
 .hiw-divider {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   color: #ccc;
-  padding-top: 1.8rem;
+  padding-top: 2rem;
   flex-shrink: 0;
+  align-self: flex-start;
 }
 
-@media (max-width: 600px) {
-  .hiw-divider { display: none; }
-  .hiw-step    { max-width: 100%; }
-  .hero-title  { font-size: 1.6rem; }
+@media (max-width: 640px) {
+  .how-it-works  { flex-direction: column; align-items: center; gap: 1.5rem; }
+  .hiw-divider   { display: none; }
+  .hiw-step      { max-width: 100%; }
+  .hero-title    { font-size: 1.6rem; }
 }
 
 /* ===== 갤러리 그리드 ===== */
