@@ -18,7 +18,10 @@ preview_id = "93b91220d60f45ff99f3371d9e0555c1"
 #   wrangler secret put GOOGLE_API_KEY
 #   wrangler secret put URLSCAN_API_KEY
 [vars]
-ENVIRONMENT = "production"
+ENVIRONMENT             = "production"
+LEMONSQUEEZY_STORE_ID   = "278930"
+LEMONSQUEEZY_VARIANT_PRO  = "1439828"
+LEMONSQUEEZY_VARIANT_TEAM = "1439849"
 
 # ===== 로컬 개발 전용 설정 (wrangler dev 실행 시 적용) =====
 # .dev.vars 파일에 실제 키를 넣어두면 로컬에서만 사용됨 (gitignore 필수!)

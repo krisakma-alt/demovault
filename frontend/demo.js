@@ -120,7 +120,7 @@ function renderDemo(demo) {
 // ===== Stripe Checkout =====
 async function startCheckout(demoId, plan) {
   try {
-    const res = await fetch(`${API_BASE}/api/stripe/checkout`, {
+    const res = await fetch(`${API_BASE}/api/ls/checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ plan, demoId }),

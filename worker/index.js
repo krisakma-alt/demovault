@@ -33,8 +33,8 @@ async function route(request, env) {
   if (pathname === '/api/admin/update' && method === 'PATCH')  return handleAdminUpdate(request, searchParams, env);
   if (pathname.startsWith('/badge/')   && method === 'GET')    return handleBadge(pathname, env);
   if (pathname.startsWith('/api/demo/') && method === 'GET')  return handleGetDemo(pathname, env);
-  if (pathname === '/api/stripe/checkout' && method === 'POST') return handleStripeCheckout(request, env);
-  if (pathname === '/api/stripe/webhook'  && method === 'POST') return handleStripeWebhook(request, env);
+  if (pathname === '/api/ls/checkout' && method === 'POST') return handleLsCheckout(request, env);
+  if (pathname === '/api/ls/webhook'  && method === 'POST') return handleLsWebhook(request, env);
 
   return jsonResponse({ error: '존재하지 않는 경로입니다.' }, 404);
 }
@@ -278,11 +278,11 @@ async function handleGetDemo(pathname, env) {
   return jsonResponse(JSON.parse(raw));
 }
 
-// ===== POST /api/stripe/checkout =====
-// Pro/Team 플랜 결제 세션 생성
-async function handleStripeCheckout(request, env) {
-  if (!env.STRIPE_SECRET_KEY) {
-    return jsonResponse({ error: 'Stripe가 설정되지 않았습니다.' }, 503);
+// ===== POST /api/ls/checkout =====
+// LemonSqueezy 결제 세션 생성
+async function handleLsCheckout(request, env) {
+  if (!env.LEMONSQUEEZY_API_KEY) {
+    return jsonResponse({ error: '결제 시스템이 설정되지 않았습니다.' }, 503);
   }
 
   let body;
@@ -291,58 +291,90 @@ async function handleStripeCheckout(request, env) {
   }
 
   const { plan, demoId } = body;
-  const PRICE_IDS = {
-    pro:  env.STRIPE_PRICE_PRO,
-    team: env.STRIPE_PRICE_TEAM,
+  const VARIANT_IDS = {
+    pro:  env.LEMONSQUEEZY_VARIANT_PRO,
+    team: env.LEMONSQUEEZY_VARIANT_TEAM,
   };
 
-  const priceId = PRICE_IDS[plan];
-  if (!priceId) return jsonResponse({ error: '올바르지 않은 플랜입니다. pro 또는 team을 선택하세요.' }, 400);
+  const variantId = VARIANT_IDS[plan];
+  if (!variantId) return jsonResponse({ error: '올바르지 않은 플랜입니다. pro 또는 team을 선택하세요.' }, 400);
 
   const BASE = 'https://demovault.youngri.org';
-  const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+  const res = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Bearer ${env.LEMONSQUEEZY_API_KEY}`,
+      'Content-Type': 'application/vnd.api+json',
+      'Accept': 'application/vnd.api+json',
     },
-    body: new URLSearchParams({
-      'payment_method_types[]': 'card',
-      'line_items[0][price]':   priceId,
-      'line_items[0][quantity]': '1',
-      'mode': 'subscription',
-      'success_url': `${BASE}/demo/${demoId}?upgraded=1`,
-      'cancel_url':  `${BASE}/demo/${demoId}`,
-      'metadata[demo_id]': demoId ?? '',
-      'metadata[plan]':    plan,
+    body: JSON.stringify({
+      data: {
+        type: 'checkouts',
+        attributes: {
+          checkout_data: {
+            custom: { demo_id: demoId ?? '', plan },
+          },
+          product_options: {
+            redirect_url: `${BASE}/demo/${demoId}?upgraded=1`,
+          },
+        },
+        relationships: {
+          store:   { data: { type: 'stores',   id: String(env.LEMONSQUEEZY_STORE_ID) } },
+          variant: { data: { type: 'variants', id: String(variantId) } },
+        },
+      },
     }),
   });
 
-  const session = await res.json();
-  if (!res.ok) return jsonResponse({ error: session.error?.message ?? 'Stripe 오류' }, 500);
+  const json = await res.json();
+  if (!res.ok) {
+    const msg = json.errors?.[0]?.detail ?? 'LemonSqueezy 오류';
+    return jsonResponse({ error: msg }, 500);
+  }
 
-  return jsonResponse({ url: session.url });
+  return jsonResponse({ url: json.data?.attributes?.url });
 }
 
-// ===== POST /api/stripe/webhook =====
-// 결제 완료 후 KV에 Pro 상태 기록
-async function handleStripeWebhook(request, env) {
-  // 실제 운영: Stripe-Signature 검증 필요
-  // 현재는 구조만 구축 (STRIPE_WEBHOOK_SECRET 설정 후 활성화)
+// ===== POST /api/ls/webhook =====
+// LemonSqueezy 결제 완료 후 KV에 Pro 상태 기록
+async function handleLsWebhook(request, env) {
+  const rawBody = await request.text();
+
+  // HMAC-SHA256 서명 검증
+  const signature = request.headers.get('X-Signature') ?? '';
+  if (env.LEMONSQUEEZY_WEBHOOK_SECRET) {
+    const key = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(env.LEMONSQUEEZY_WEBHOOK_SECRET),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign'],
+    );
+    const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(rawBody));
+    const expected = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+    if (expected !== signature) {
+      return new Response('invalid signature', { status: 401 });
+    }
+  }
+
   let event;
-  try { event = await request.json(); } catch {
+  try { event = JSON.parse(rawBody); } catch {
     return new Response('bad json', { status: 400 });
   }
 
-  if (event.type === 'checkout.session.completed') {
-    const { demo_id, plan } = event.data?.object?.metadata ?? {};
-    if (demo_id) {
-      const raw = await env.DEMOS.get(demo_id);
+  // order_created 이벤트 처리
+  if (event.meta?.event_name === 'order_created') {
+    const custom  = event.meta?.custom_data ?? {};
+    const demoId  = custom.demo_id;
+    const plan    = custom.plan ?? 'pro';
+
+    if (demoId) {
+      const raw = await env.DEMOS.get(demoId);
       if (raw) {
         const demo = JSON.parse(raw);
-        demo.tier = plan ?? 'pro';
+        demo.tier            = plan;
         demo.tierActivatedAt = Date.now();
-        await env.DEMOS.put(demo_id, JSON.stringify(demo));
+        await env.DEMOS.put(demoId, JSON.stringify(demo));
       }
     }
   }
