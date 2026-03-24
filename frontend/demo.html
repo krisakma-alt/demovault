@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- 동적 메타태그는 demo.js에서 document.title 등으로 채워짐 -->
+  <title>DemoVault</title>
+  <meta name="description" content="Safety-checked AI demo on DemoVault." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* 데모 상세 전용 스타일 */
+    .demo-detail { max-width: 680px; margin: 2rem auto; padding: 0 1.5rem; }
+
+    .detail-header { margin-bottom: 1.5rem; }
+    .detail-name   { font-size: 1.8rem; font-weight: 800; margin: 0 0 0.4rem; }
+    .detail-meta   { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; color: #888; font-size: 0.85rem; }
+
+    .detail-desc   { color: #444; line-height: 1.7; margin-bottom: 1.5rem; }
+
+    /* 안전검사 결과 박스 */
+    .scan-box      { background: #f8f9fa; border-radius: 10px; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; }
+    .scan-box h3   { font-size: 0.9rem; color: #555; margin: 0 0 0.8rem; text-transform: uppercase; letter-spacing: .05em; }
+    .scan-rows     { display: flex; flex-direction: column; gap: 0.5rem; }
+    .scan-row      { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
+    .scan-label    { color: #555; }
+    .scan-icon.safe    { color: #4caf50; font-weight: 700; }
+    .scan-icon.unsafe  { color: #f44336; font-weight: 700; }
+    .scan-icon.pending { color: #ff9800; }
+
+    /* 통계 */
+    .stats-row     { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .stat-box      { background: #fff; border: 1px solid #e9ecef; border-radius: 10px; padding: 1rem 1.4rem; flex: 1; min-width: 120px; text-align: center; }
+    .stat-num      { font-size: 1.6rem; font-weight: 800; color: #1a1a2e; }
+    .stat-label    { font-size: 0.75rem; color: #888; margin-top: 0.2rem; }
+
+    /* 임베드 코드 박스 */
+    .embed-box     { background: #1a1a2e; border-radius: 10px; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; }
+    .embed-box h3  { color: #aaa; font-size: 0.8rem; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 0.8rem; }
+    .embed-preview { margin-bottom: 0.8rem; }
+    .embed-code    { background: #0d0d1a; color: #7ec8e3; font-family: monospace; font-size: 0.8rem;
+                     padding: 0.8rem 1rem; border-radius: 6px; word-break: break-all; white-space: pre-wrap; }
+    .copy-btn      { margin-top: 0.6rem; background: #3a3a5e; color: #fff; border: none; border-radius: 6px;
+                     padding: 0.4rem 1rem; font-size: 0.82rem; cursor: pointer; }
+    .copy-btn:hover { background: #5a5a8e; }
+
+    /* Pro CTA */
+    .pro-cta       { background: linear-gradient(135deg, #1a1a2e, #3a3a6e); color: #fff; border-radius: 12px;
+                     padding: 1.5rem 1.8rem; margin-bottom: 1.5rem; }
+    .pro-cta h3    { margin: 0 0 0.5rem; font-size: 1.1rem; }
+    .pro-cta p     { margin: 0 0 1rem; color: #bbb; font-size: 0.88rem; line-height: 1.6; }
+    .pro-cta ul    { margin: 0 0 1.2rem; padding-left: 1.2rem; color: #ccc; font-size: 0.85rem; line-height: 1.8; }
+    .pro-btn       { background: #fff; color: #1a1a2e; border: none; border-radius: 8px;
+                     padding: 0.6rem 1.4rem; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+    .pro-btn:hover { background: #e0e0ff; }
+
+    /* 방문 버튼 */
+    .visit-big     { display: block; width: 100%; padding: 0.9rem; border: none; border-radius: 10px;
+                     background: #1a1a2e; color: #fff; font-size: 1rem; font-weight: 700;
+                     cursor: pointer; margin-bottom: 1rem; }
+    .visit-big:hover { background: #2e2e5e; }
+
+    .back-link     { display: inline-block; color: #888; font-size: 0.85rem; margin-bottom: 1.5rem; text-decoration: none; }
+    .back-link:hover { color: #1a1a2e; }
+
+    /* 상태 */
+    .state-box { text-align: center; padding: 3rem 1rem; color: #888; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="/" style="text-decoration:none;color:inherit;">DemoVault</a></h1>
+    <nav>
+      <a href="/submit">Submit Demo</a>
+    </nav>
+  </header>
+
+  <main>
+    <div id="state-loading" class="state-box">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+
+    <div id="state-error" class="state-box" hidden>
+      <p>⚠️ 데모를 불러올 수 없습니다.</p>
+      <a href="/">← 갤러리로 돌아가기</a>
+    </div>
+
+    <div id="demo-detail" class="demo-detail" hidden>
+      <a href="/" class="back-link">← 갤러리로 돌아가기</a>
+
+      <div class="detail-header">
+        <h2 class="detail-name" id="d-name"></h2>
+        <div class="detail-meta">
+          <span id="d-category" class="card-category"></span>
+          <span id="d-date"></span>
+          <span class="badge" id="d-badge"></span>
+        </div>
+      </div>
+
+      <p class="detail-desc" id="d-desc"></p>
+
+      <!-- 안전검사 결과 -->
+      <div class="scan-box">
+        <h3>🛡️ Safety Scan Results</h3>
+        <div class="scan-rows" id="d-scan-rows"></div>
+      </div>
+
+      <!-- 통계 -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-num" id="stat-clicks">—</div>
+          <div class="stat-label">Total Clicks</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-useful">—</div>
+          <div class="stat-label">👍 Useful</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-tried">—</div>
+          <div class="stat-label">🧪 Tried it</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-needs">—</div>
+          <div class="stat-label">🔧 Needs work</div>
+        </div>
+      </div>
+
+      <!-- Visit 버튼 -->
+      <button class="visit-big" id="visit-btn">Visit Demo →</button>
+
+      <!-- 임베드 뱃지 -->
+      <div class="embed-box">
+        <h3>🔗 Embed Badge</h3>
+        <div class="embed-preview" id="badge-preview"></div>
+        <div class="embed-code" id="embed-code"></div>
+        <button class="copy-btn" id="copy-btn">Copy Code</button>
+      </div>
+
+      <!-- Pro CTA (Free 데모에만 표시) -->
+      <div class="pro-cta" id="pro-cta" hidden>
+        <h3>🚀 Upgrade to Pro</h3>
+        <p>더 많은 기능으로 내 데모를 돋보이게 하세요.</p>
+        <ul>
+          <li>상세 Analytics (클릭 추이, 유입경로)</li>
+          <li>즉시 재검사 (수시 재스캔)</li>
+          <li>갤러리 상단 노출 우선순위</li>
+          <li>커스텀 데모 페이지 설명 확장</li>
+        </ul>
+        <button class="pro-btn" id="pro-btn">Upgrade to Pro — $9/mo</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 안전 게이트 모달 (index.html과 동일) -->
+  <div id="gate-modal" class="modal-overlay" hidden>
+    <div class="modal-box">
+      <h2 class="modal-title">🔍 Safety Check</h2>
+      <p class="modal-url" id="modal-url-text"></p>
+      <div class="modal-status" id="modal-status">
+        <div class="spinner"></div>
+        <p>Checking...</p>
+      </div>
+      <div class="modal-result" id="modal-result" hidden></div>
+      <div class="modal-actions">
+        <button id="modal-cancel">Cancel</button>
+        <button id="modal-proceed" hidden>Visit →</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="demo.js"></script>
+</body>
+</html>

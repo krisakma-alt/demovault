@@ -670,3 +670,13 @@ select {
 }
 
 .card-visit-btn.mini-visit:hover { background: #2e2e5e; }
+
+/* ===== 카드 이름 링크 ===== */
+.card-name-link {
+  color: inherit;
+  text-decoration: none;
+}
+.card-name-link:hover {
+  text-decoration: underline;
+  color: #3a3a8e;
+}

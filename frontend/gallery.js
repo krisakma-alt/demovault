@@ -154,7 +154,7 @@ function createCard(demo) {
 
   article.innerHTML = `
     <div class="card-header">
-      <h3 class="card-name">${escapeHtml(name)}</h3>
+      <h3 class="card-name"><a href="/demo/${id}" class="card-name-link">${escapeHtml(name)}</a></h3>
       <button class="badge ${BADGE_CLASS[overall] ?? 'pending'}"
         data-badge="${overall}" data-open="false"
         aria-expanded="false" aria-label="검사 결과 보기"
