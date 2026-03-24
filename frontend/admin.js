@@ -96,8 +96,104 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+// ===== 피처 리퀘스트 목록 =====
+const REQ_STATUS_LABELS = {
+  new:       '🆕 New',
+  reviewing: '👀 Reviewing',
+  planned:   '📅 Planned',
+  done:      '✅ Done',
+  declined:  '❌ Declined',
+};
+
+const REQ_TYPE_LABELS = { feature: '✨ Feature', bug: '🐛 Bug', other: '💬 Other' };
+
+async function loadRequests() {
+  document.getElementById('req-loading').hidden = false;
+  document.getElementById('req-empty').hidden   = true;
+  document.getElementById('req-list').innerHTML = '';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/requests`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const requests = await res.json();
+
+    document.getElementById('req-loading').hidden = true;
+
+    if (!requests.length) {
+      document.getElementById('req-empty').hidden = false;
+      return;
+    }
+
+    renderRequests(requests);
+  } catch (err) {
+    document.getElementById('req-loading').hidden = true;
+    document.getElementById('req-list').innerHTML =
+      `<p style="color:#e00;text-align:center">오류: ${err.message}</p>`;
+  }
+}
+
+function renderRequests(requests) {
+  const list = document.getElementById('req-list');
+  list.innerHTML = '';
+
+  requests.forEach(req => {
+    const date = new Date(req.createdAt).toLocaleDateString('en-CA');
+    const card = document.createElement('div');
+    card.className = 'req-card';
+    card.innerHTML = `
+      <div class="req-card-header">
+        <span class="req-type">${REQ_TYPE_LABELS[req.type] ?? req.type}</span>
+        <span class="req-date">${date}</span>
+        <select class="req-status-select" data-id="${req.id}">
+          ${Object.entries(REQ_STATUS_LABELS).map(([val, label]) =>
+            `<option value="${val}" ${req.status === val ? 'selected' : ''}>${label}</option>`
+          ).join('')}
+        </select>
+      </div>
+      <p class="req-message">${escapeHtml(req.message)}</p>
+      ${req.name  ? `<p class="req-meta">👤 ${escapeHtml(req.name)}</p>`  : ''}
+      ${req.email ? `<p class="req-meta">📧 <a href="mailto:${escapeHtml(req.email)}">${escapeHtml(req.email)}</a></p>` : ''}
+    `;
+
+    card.querySelector('.req-status-select').addEventListener('change', async e => {
+      const status = e.target.value;
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/req-status?id=${req.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status }),
+        });
+        if (!res.ok) throw new Error();
+      } catch {
+        alert('상태 변경 실패');
+        e.target.value = req.status; // 롤백
+      }
+    });
+
+    list.appendChild(card);
+  });
+}
+
+// ===== 탭 전환 =====
+function initTabs() {
+  document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const name = tab.dataset.tab;
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      document.getElementById('tab-demos').hidden    = (name !== 'demos');
+      document.getElementById('tab-requests').hidden = (name !== 'requests');
+
+      if (name === 'requests') loadRequests();
+    });
+  });
+}
+
 // ===== 진입점 =====
 document.addEventListener('DOMContentLoaded', () => {
+  initTabs();
+
   document.getElementById('edit-cancel').addEventListener('click', () => {
     document.getElementById('edit-modal').hidden = true;
     editingId = null;

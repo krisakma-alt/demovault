@@ -33,8 +33,11 @@ async function route(request, env) {
   if (pathname === '/api/admin/update' && method === 'PATCH')  return handleAdminUpdate(request, searchParams, env);
   if (pathname.startsWith('/badge/')   && method === 'GET')    return handleBadge(pathname, env);
   if (pathname.startsWith('/api/demo/') && method === 'GET')  return handleGetDemo(pathname, env);
-  if (pathname === '/api/ls/checkout' && method === 'POST') return handleLsCheckout(request, env);
-  if (pathname === '/api/ls/webhook'  && method === 'POST') return handleLsWebhook(request, env);
+  if (pathname === '/api/ls/checkout'      && method === 'POST')   return handleLsCheckout(request, env);
+  if (pathname === '/api/ls/webhook'       && method === 'POST')   return handleLsWebhook(request, env);
+  if (pathname === '/api/request'          && method === 'POST')   return handleRequest(request, env);
+  if (pathname === '/api/admin/requests'   && method === 'GET')    return handleAdminRequests(env);
+  if (pathname === '/api/admin/req-status' && method === 'PATCH')  return handleReqStatus(request, searchParams, env);
 
   return jsonResponse({ error: '존재하지 않는 경로입니다.' }, 404);
 }
@@ -380,6 +383,79 @@ async function handleLsWebhook(request, env) {
   }
 
   return new Response('ok', { status: 200 });
+}
+
+// ===== POST /api/request =====
+// 개발자 피처 리퀘스트 / 버그 제보 접수
+const VALID_REQ_TYPES = ['feature', 'bug', 'other'];
+
+async function handleRequest(request, env) {
+  let body;
+  try { body = await request.json(); } catch {
+    return jsonResponse({ error: '요청 본문이 올바르지 않습니다.' }, 400);
+  }
+
+  const { type, message, email = '', name = '' } = body;
+
+  if (!VALID_REQ_TYPES.includes(type)) {
+    return jsonResponse({ error: 'type은 feature | bug | other 중 하나여야 합니다.' }, 400);
+  }
+  if (!message || message.trim().length < 10) {
+    return jsonResponse({ error: '내용을 10자 이상 입력해주세요.' }, 400);
+  }
+  if (message.trim().length > 1000) {
+    return jsonResponse({ error: '내용은 1000자 이내로 입력해주세요.' }, 400);
+  }
+
+  const id = `req_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+  const req = {
+    id,
+    type,
+    message: message.trim(),
+    email:   email.trim().slice(0, 200),
+    name:    name.trim().slice(0, 100),
+    status:  'new',       // new | reviewing | planned | done | declined
+    createdAt: Date.now(),
+  };
+
+  await env.DEMOS.put(id, JSON.stringify(req));
+  return jsonResponse({ success: true, id }, 201);
+}
+
+// ===== GET /api/admin/requests =====
+async function handleAdminRequests(env) {
+  const { keys } = await env.DEMOS.list({ prefix: 'req_' });
+  const requests = (await Promise.all(
+    keys.map(({ name: key }) =>
+      env.DEMOS.get(key).then(raw => raw ? JSON.parse(raw) : null)
+    )
+  )).filter(Boolean);
+  requests.sort((a, b) => b.createdAt - a.createdAt);
+  return jsonResponse(requests);
+}
+
+// ===== PATCH /api/admin/req-status?id= =====
+async function handleReqStatus(request, searchParams, env) {
+  const id = searchParams.get('id');
+  if (!id) return jsonResponse({ error: 'id가 필요합니다.' }, 400);
+
+  const raw = await env.DEMOS.get(id);
+  if (!raw) return jsonResponse({ error: '해당 요청을 찾을 수 없습니다.' }, 404);
+
+  let body;
+  try { body = await request.json(); } catch {
+    return jsonResponse({ error: '요청 본문이 올바르지 않습니다.' }, 400);
+  }
+
+  const VALID_STATUSES = ['new', 'reviewing', 'planned', 'done', 'declined'];
+  if (!VALID_STATUSES.includes(body.status)) {
+    return jsonResponse({ error: '올바르지 않은 status입니다.' }, 400);
+  }
+
+  const req = JSON.parse(raw);
+  req.status = body.status;
+  await env.DEMOS.put(id, JSON.stringify(req));
+  return jsonResponse({ success: true, req });
 }
 
 // ===== 헬퍼 =====

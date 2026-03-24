@@ -15,6 +15,14 @@
     </nav>
   </header>
   <main>
+    <!-- 탭 -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="demos">📋 데모 관리</button>
+      <button class="admin-tab"        data-tab="requests">💡 피처 리퀘스트</button>
+    </div>
+
+    <!-- 데모 탭 -->
+    <div id="tab-demos">
     <div id="admin-section">
       <div id="state-loading" class="state-box">
         <div class="spinner"></div>
@@ -39,6 +47,20 @@
           <tbody id="demo-tbody"></tbody>
         </table>
       </div>
+    </div>
+    </div><!-- /tab-demos -->
+
+    <!-- 리퀘스트 탭 -->
+    <div id="tab-requests" hidden>
+      <div id="req-loading" class="state-box">
+        <div class="spinner"></div>
+        <p>불러오는 중...</p>
+      </div>
+      <div id="req-empty" class="state-box" hidden>
+        <p class="state-icon">📭</p>
+        <p>아직 피처 리퀘스트가 없습니다.</p>
+      </div>
+      <div id="req-list"></div>
     </div>
   </main>
   <!-- 수정 모달 -->

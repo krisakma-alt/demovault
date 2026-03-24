@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feature Request — DemoVault</title>
+  <meta name="description" content="Request a feature or report a bug on DemoVault. We read every submission." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .request-wrap {
+      max-width: 560px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .request-wrap h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+    }
+
+    .request-wrap .sub {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .type-btns {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .type-btn {
+      flex: 1;
+      padding: 0.55rem 0;
+      border: 1.5px solid #e9ecef;
+      border-radius: 8px;
+      background: #f8f9fa;
+      color: #555;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .type-btn:hover   { border-color: #adb5bd; background: #f0f0f0; }
+    .type-btn.active  { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+
+    .request-wrap label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 0.3rem;
+    }
+
+    .request-wrap input,
+    .request-wrap textarea {
+      width: 100%;
+      padding: 0.65rem 0.9rem;
+      border: 1.5px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      margin-bottom: 1rem;
+      box-sizing: border-box;
+      transition: border-color 0.15s;
+    }
+
+    .request-wrap input:focus,
+    .request-wrap textarea:focus {
+      outline: none;
+      border-color: #1a1a2e;
+    }
+
+    .request-wrap textarea { resize: vertical; min-height: 120px; }
+
+    .char-count {
+      font-size: 0.75rem;
+      color: #aaa;
+      text-align: right;
+      margin-top: -0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .optional-label { color: #aaa; font-weight: 400; }
+
+    .submit-btn {
+      width: 100%;
+      padding: 0.8rem;
+      background: #1a1a2e;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .submit-btn:hover    { background: #2e2e5e; }
+    .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+    .result-box {
+      text-align: center;
+      padding: 2.5rem 1rem;
+    }
+
+    .result-box .result-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .result-box h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+    .result-box p  { color: #666; font-size: 0.9rem; }
+    .result-box a  { color: #1a1a2e; font-weight: 600; }
+
+    .back-link {
+      display: inline-block;
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+      text-decoration: none;
+    }
+    .back-link:hover { color: #1a1a2e; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="/" style="text-decoration:none;color:inherit;">DemoVault</a></h1>
+    <nav>
+      <a href="/submit">Submit Demo</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="request-wrap">
+      <a href="/" class="back-link">← 갤러리로 돌아가기</a>
+      <h2>💡 Feature Request</h2>
+      <p class="sub">
+        새로운 기능 제안, 버그 제보, 아이디어 무엇이든 환영합니다.<br>
+        모든 제출을 직접 읽고 반영 여부를 검토합니다.
+      </p>
+
+      <div id="form-wrap">
+        <!-- 유형 선택 -->
+        <div class="type-btns" id="type-btns">
+          <button class="type-btn active" data-type="feature">✨ Feature</button>
+          <button class="type-btn"        data-type="bug">🐛 Bug</button>
+          <button class="type-btn"        data-type="other">💬 Other</button>
+        </div>
+
+        <form id="request-form">
+          <label for="req-message">내용 <span style="color:#e00">*</span></label>
+          <textarea id="req-message" maxlength="1000" placeholder="어떤 기능이 있으면 좋을까요? 최대한 구체적으로 적어주세요." required></textarea>
+          <div class="char-count"><span id="char-count">0</span> / 1000</div>
+
+          <label for="req-name">이름 <span class="optional-label">(선택)</span></label>
+          <input type="text" id="req-name" maxlength="100" placeholder="홍길동" />
+
+          <label for="req-email">이메일 <span class="optional-label">(선택 — 답장 받고 싶다면)</span></label>
+          <input type="email" id="req-email" maxlength="200" placeholder="you@example.com" />
+
+          <button type="submit" class="submit-btn" id="submit-btn">제출하기 →</button>
+        </form>
+      </div>
+
+      <div id="result-box" class="result-box" hidden>
+        <div class="result-icon">🎉</div>
+        <h3>제출 완료!</h3>
+        <p>소중한 의견 감사합니다. 직접 읽고 검토하겠습니다.</p>
+        <p style="margin-top:1rem"><a href="/">← 갤러리로 돌아가기</a></p>
+      </div>
+    </div>
+  </main>
+
+  <script src="request.js"></script>
+</body>
+</html>
