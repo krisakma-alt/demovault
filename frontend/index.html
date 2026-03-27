@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DemoVault — Discover AI Demos, Safety Checked</title>
-  <meta name="description" content="Submit your AI demo and let others discover it. Every link is scanned with 3 safety tools before you click. No rankings, no bots." />
+  <meta name="description" content="Submit your AI demo and let others discover it. Every link is scanned with 4 safety tools before you click. No rankings, no bots." />
 
   <!-- Open Graph -->
   <meta property="og:type"        content="website" />
   <meta property="og:url"         content="https://demovault.youngri.org/" />
   <meta property="og:title"       content="DemoVault — Discover AI Demos, Safety Checked" />
-  <meta property="og:description" content="An open gallery for AI demos. Every link is scanned with Google Web Risk, Safe Browsing, and URLScan before you visit." />
+  <meta property="og:description" content="An open gallery for AI demos. Every link is scanned with Google Web Risk, Safe Browsing, URLScan, and VirusTotal before you visit." />
   <meta property="og:image"       content="https://demovault.youngri.org/og.png" />
 
   <!-- Twitter Card -->
@@ -26,7 +26,7 @@
     "@type": "WebSite",
     "name": "DemoVault",
     "url": "https://demovault.youngri.org",
-    "description": "An open gallery for AI demos with 3-way safety scanning.",
+    "description": "An open gallery for AI demos with 4-engine safety scanning.",
     "potentialAction": {
       "@type": "SearchAction",
       "target": "https://demovault.youngri.org/?q={search_term_string}",
@@ -35,42 +35,43 @@
   }
   </script>
 
-  <link rel="stylesheet" href="style.css?v=20260324" />
+  <link rel="stylesheet" href="style.css?v=20260324b" />
 </head>
 <body>
   <header>
     <h1>DemoVault</h1>
     <nav>
+      <a href="/compare">Repo vs Repo</a>
       <a href="/submit" data-i18n="nav.submit">Submit Demo</a>
       <button id="lang-toggle" aria-label="Toggle language">KR / EN</button>
     </nav>
   </header>
 
   <section class="hero">
-    <p class="hero-eyebrow">AI 데모 갤러리</p>
-    <h2 class="hero-title">내가 만든 AI 데모,<br>세상에 안전하게 공개하기</h2>
-    <p class="hero-sub">URL만 있으면 등록 끝. 3가지 보안 도구로 자동 검사 후 갤러리에 게시됩니다.<br>방문자는 검사 결과를 확인하고 안심하고 클릭할 수 있어요.</p>
-    <a href="/submit" class="hero-btn">내 데모 등록하기 →</a>
+    <p class="hero-eyebrow" data-i18n="hero.eyebrow">AI 데모 갤러리</p>
+    <h2 class="hero-title" data-i18n-html="hero.title">내가 만든 AI 데모,<br>세상에 안전하게 공개하기</h2>
+    <p class="hero-sub" data-i18n-html="hero.sub">URL만 있으면 등록 끝. 4가지 보안 도구로 자동 검사 후 갤러리에 게시됩니다.<br>방문자는 검사 결과를 확인하고 안심하고 클릭할 수 있어요.</p>
+    <a href="/submit" class="hero-btn" data-i18n="hero.btn">내 데모 등록하기 →</a>
   </section>
 
   <!-- How it works -->
   <section class="how-it-works">
     <div class="hiw-step">
       <div class="hiw-icon">🚀</div>
-      <h3>1. URL 등록</h3>
-      <p>데모 URL과 간단한 설명만 입력하세요. 계정 없이도 등록 가능합니다.</p>
+      <h3 data-i18n="hiw.step1.title">1. URL 등록</h3>
+      <p data-i18n="hiw.step1.desc">데모 URL과 간단한 설명만 입력하세요. 계정 없이도 등록 가능합니다.</p>
     </div>
     <div class="hiw-divider">→</div>
     <div class="hiw-step">
       <div class="hiw-icon">🛡️</div>
-      <h3>2. 자동 안전 검사</h3>
-      <p>Google Web Risk, Safe Browsing, URLScan 3가지 도구로 즉시 검사합니다.</p>
+      <h3 data-i18n="hiw.step2.title">2. 자동 안전 검사</h3>
+      <p data-i18n="hiw.step2.desc">Google Web Risk, Safe Browsing, URLScan, VirusTotal 4가지 도구로 즉시 검사합니다.</p>
     </div>
     <div class="hiw-divider">→</div>
     <div class="hiw-step">
       <div class="hiw-icon">🌍</div>
-      <h3>3. 갤러리 게시</h3>
-      <p>검사 통과 후 갤러리에 공개됩니다. 개발자들이 발견하고 피드백을 남깁니다.</p>
+      <h3 data-i18n="hiw.step3.title">3. 갤러리 게시</h3>
+      <p data-i18n="hiw.step3.desc">검사 통과 후 갤러리에 공개됩니다. 개발자들이 발견하고 피드백을 남깁니다.</p>
     </div>
   </section>
 
@@ -86,6 +87,19 @@
       <h2 class="section-title">🚀 Just Launched</h2>
       <div id="just-launched-list" class="mini-card-list"></div>
     </section>
+
+    <!-- 검색바 + 정렬 -->
+    <div class="search-sort-bar">
+      <input type="search" id="search-input"
+             data-i18n-placeholder="search.placeholder"
+             placeholder="Search demos by name or description..."
+             autocomplete="off" />
+      <select id="sort-select" class="sort-select">
+        <option value="reviews" data-i18n="sort.reviews">Most Reviewed</option>
+        <option value="popular" data-i18n="sort.popular">Most Popular</option>
+        <option value="newest" data-i18n="sort.newest">Newest</option>
+      </select>
+    </div>
 
     <!-- 카테고리 필터 -->
     <div id="category-filters" class="category-filters">
@@ -143,7 +157,7 @@
     </p>
   </footer>
 
-  <script src="i18n.js"></script>
-  <script src="gallery.js"></script>
+  <script src="i18n.js?v=20260324b"></script>
+  <script src="gallery.js?v=20260324b"></script>
 </body>
 </html>
