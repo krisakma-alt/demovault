@@ -329,7 +329,7 @@ async function handleGetDemo(pathname, env) {
   const raw = await env.DEMOS.get(id);
   if (!raw) return jsonResponse({ error: '해당 데모를 찾을 수 없습니다.' }, 404);
 
-  return jsonResponse(JSON.parse(raw));
+  return jsonResponse(JSON.parse(raw), 200, { 'Cache-Control': 'public, max-age=30, s-maxage=60' });
 }
 
 // ===== POST /api/ls/checkout =====
@@ -570,7 +570,7 @@ async function handleGetReviews(searchParams, env) {
   const reviews = raw ? JSON.parse(raw) : [];
   // 최신순 정렬
   reviews.sort((a, b) => b.createdAt - a.createdAt);
-  return jsonResponse(reviews);
+  return jsonResponse(reviews, 200, { 'Cache-Control': 'public, max-age=30, s-maxage=60' });
 }
 
 // ===== POST /api/reviews?id= =====
