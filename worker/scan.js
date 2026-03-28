@@ -35,11 +35,13 @@ export async function scanUrl(targetUrl, env) {
   const overall = Object.values(results).includes(UNSAFE) ? UNSAFE : SAFE;
   const duration = Date.now() - start;
 
-  // 스캔 결과 로깅
+  // 구조화된 스캔 로깅
   const failedEngines = Object.entries(results).filter(([, v]) => v === PENDING).map(([k]) => k);
-  if (failedEngines.length > 0) {
-    console.warn(`[SCAN] ${targetUrl} — ${duration}ms | overall: ${overall} | failed: ${failedEngines.join(', ')}`);
-  }
+  console.log(JSON.stringify({
+    type: 'scan', url: targetUrl, duration, overall,
+    engines: results,
+    ...(failedEngines.length > 0 && { failed: failedEngines }),
+  }));
 
   return { overall, details: results };
 }

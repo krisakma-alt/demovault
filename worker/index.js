@@ -10,32 +10,38 @@ export default {
 
     const start = Date.now();
     const { pathname } = new URL(request.url);
+    const reqId = crypto.randomUUID().slice(0, 8);
 
     try {
       const response = await route(request, env);
       const duration = Date.now() - start;
 
-      // 느린 요청 로깅 (500ms 이상)
-      if (duration > 500) {
-        console.warn(`[SLOW] ${request.method} ${pathname} — ${duration}ms (status: ${response.status})`);
+      // 구조화된 요청 로깅 (느린 요청 또는 에러 응답)
+      if (duration > 500 || response.status >= 400) {
+        console.log(JSON.stringify({
+          level: duration > 500 ? 'warn' : 'info',
+          reqId, method: request.method, path: pathname,
+          status: response.status, duration,
+          cf: request.cf?.country,
+        }));
       }
 
       return response;
     } catch (err) {
       const duration = Date.now() - start;
-      console.error(`[ERROR] ${request.method} ${pathname} — ${duration}ms`, {
-        message: err.message,
-        stack: err.stack,
-      });
+      console.error(JSON.stringify({
+        level: 'error', reqId, method: request.method, path: pathname,
+        duration, error: err.message, stack: err.stack?.split('\n').slice(0, 3).join(' | '),
+      }));
 
       // Discord 에러 알림
       if (env.DISCORD_WEBHOOK_URL) {
         ctx.waitUntil(sendDiscordNotification(env.DISCORD_WEBHOOK_URL,
-          `🚨 **DemoVault 오류**\n\`${request.method} ${pathname}\` — ${duration}ms\n\`\`\`${err.message}\`\`\``
+          `🚨 **DemoVault 오류** [${reqId}]\n\`${request.method} ${pathname}\` — ${duration}ms\n\`\`\`${err.message}\`\`\``
         ));
       }
 
-      return jsonResponse({ error: '서버 내부 오류가 발생했습니다.' }, 500);
+      return jsonResponse({ error: '서버 내부 오류가 발생했습니다.', reqId }, 500);
     }
   },
 
@@ -69,6 +75,7 @@ async function route(request, env) {
   if (pathname === '/api/captcha'          && method === 'GET')    return handleCaptcha(env);
   if (pathname === '/api/reviews'          && method === 'GET')    return handleGetReviews(searchParams, env);
   if (pathname === '/api/reviews'          && method === 'POST')   return handlePostReview(request, searchParams, env);
+  if (pathname === '/api/health'           && method === 'GET')    return handleHealth(env);
 
   return jsonResponse({ error: '존재하지 않는 경로입니다.' }, 404);
 }
@@ -646,6 +653,41 @@ async function hashString(str) {
   const data = new TextEncoder().encode(str);
   const buf = await crypto.subtle.digest('SHA-256', data);
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
+}
+
+// ===== GET /api/health =====
+// 서비스 상태 + 데모 통계 반환
+async function handleHealth(env) {
+  const { keys } = await env.DEMOS.list();
+  const demoKeys = keys.filter(({ name }) =>
+    !name.startsWith('req_') && !name.startsWith('reviews_') && !name.startsWith('rl_')
+  );
+
+  // 카테고리별 카운트 + 스캔 상태 집계 (전체 데이터 읽지 않고 키만 사용하면 안 되니까 샘플링)
+  let safe = 0, unsafe = 0, pending = 0;
+  const sampleSize = Math.min(demoKeys.length, 50);
+  const sampleKeys = demoKeys.slice(0, sampleSize);
+
+  for (const { name: key } of sampleKeys) {
+    const raw = await env.DEMOS.get(key);
+    if (!raw) continue;
+    const demo = JSON.parse(raw);
+    const overall = demo.scanResult?.overall;
+    if (overall === 'safe') safe++;
+    else if (overall === 'unsafe') unsafe++;
+    else pending++;
+  }
+
+  return jsonResponse({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    demos: {
+      total: demoKeys.length,
+      sample: { safe, unsafe, pending, size: sampleSize },
+    },
+    requests: keys.filter(({ name }) => name.startsWith('req_')).length,
+    engines: ['Google Web Risk', 'Safe Browsing', 'URLScan.io', 'VirusTotal'],
+  }, 200, { 'Cache-Control': 'no-cache' });
 }
 
 // ===== 헬퍼 =====
