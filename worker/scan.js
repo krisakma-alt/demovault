@@ -4,22 +4,42 @@ const SAFE     = 'safe';
 const UNSAFE   = 'unsafe';
 const PENDING  = 'pending';
 
-// 메인 함수: 3종 API 병렬 실행 후 결과 집계
+// 메인 함수: 4종 API 병렬 실행 후 결과 집계
 export async function scanUrl(targetUrl, env) {
-  const [webRisk, safeBrowsing, urlscan] = await Promise.allSettled([
+  const scanners = [
     checkGoogleWebRisk(targetUrl, env.GOOGLE_API_KEY),
     checkGoogleSafeBrowsing(targetUrl, env.GOOGLE_API_KEY),
     checkUrlscan(targetUrl, env.URLSCAN_API_KEY),
-  ]);
+  ];
+
+  // VirusTotal은 API 키가 있을 때만 실행
+  if (env.VIRUSTOTAL_API_KEY) {
+    scanners.push(checkVirusTotal(targetUrl, env.VIRUSTOTAL_API_KEY));
+  }
+
+  const start = Date.now();
+  const [webRisk, safeBrowsing, urlscan, virusTotal] = await Promise.allSettled(scanners);
 
   const results = {
-    webRisk:      extractResult(webRisk),
-    safeBrowsing: extractResult(safeBrowsing),
-    urlscan:      extractResult(urlscan),
+    webRisk:      extractResult(webRisk, 'webRisk'),
+    safeBrowsing: extractResult(safeBrowsing, 'safeBrowsing'),
+    urlscan:      extractResult(urlscan, 'urlscan'),
   };
+
+  // VirusTotal 결과 추가 (API 키가 있는 경우)
+  if (env.VIRUSTOTAL_API_KEY && virusTotal) {
+    results.virusTotal = extractResult(virusTotal, 'virusTotal');
+  }
 
   // 하나라도 unsafe이면 전체 unsafe
   const overall = Object.values(results).includes(UNSAFE) ? UNSAFE : SAFE;
+  const duration = Date.now() - start;
+
+  // 스캔 결과 로깅
+  const failedEngines = Object.entries(results).filter(([, v]) => v === PENDING).map(([k]) => k);
+  if (failedEngines.length > 0) {
+    console.warn(`[SCAN] ${targetUrl} — ${duration}ms | overall: ${overall} | failed: ${failedEngines.join(', ')}`);
+  }
 
   return { overall, details: results };
 }
@@ -106,10 +126,67 @@ async function checkUrlscan(targetUrl, apiKey) {
   return PENDING;
 }
 
+// ===== VirusTotal =====
+async function checkVirusTotal(targetUrl, apiKey) {
+  // URL을 base64로 인코딩 (패딩 제거)
+  const urlId = btoa(targetUrl).replace(/=/g, '');
+
+  // 먼저 기존 분석 결과 조회
+  const lookupRes = await fetch(`https://www.virustotal.com/api/v3/urls/${urlId}`, {
+    headers: { 'x-apikey': apiKey },
+  });
+
+  if (lookupRes.ok) {
+    const data = await lookupRes.json();
+    const stats = data.data?.attributes?.last_analysis_stats;
+    if (stats) {
+      // malicious 또는 suspicious가 2개 이상이면 unsafe
+      const bad = (stats.malicious ?? 0) + (stats.suspicious ?? 0);
+      return bad >= 2 ? UNSAFE : SAFE;
+    }
+  }
+
+  // 기존 결과 없으면 새로 스캔 제출
+  const submitRes = await fetch('https://www.virustotal.com/api/v3/urls', {
+    method: 'POST',
+    headers: {
+      'x-apikey': apiKey,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `url=${encodeURIComponent(targetUrl)}`,
+  });
+
+  if (!submitRes.ok) throw new Error(`VirusTotal submit error: ${submitRes.status}`);
+
+  const { data } = await submitRes.json();
+  const analysisId = data?.id;
+  if (!analysisId) return PENDING;
+
+  // 결과 폴링 (최대 20초)
+  const deadline = Date.now() + 20_000;
+  while (Date.now() < deadline) {
+    await sleep(5_000);
+    const pollRes = await fetch(`https://www.virustotal.com/api/v3/analyses/${analysisId}`, {
+      headers: { 'x-apikey': apiKey },
+    });
+    if (!pollRes.ok) continue;
+
+    const pollData = await pollRes.json();
+    const status = pollData.data?.attributes?.status;
+    if (status === 'completed') {
+      const stats = pollData.data.attributes.stats;
+      const bad = (stats.malicious ?? 0) + (stats.suspicious ?? 0);
+      return bad >= 2 ? UNSAFE : SAFE;
+    }
+  }
+
+  return PENDING;
+}
+
 // ===== 헬퍼 =====
-function extractResult(settled) {
+function extractResult(settled, engineName = 'unknown') {
   if (settled.status === 'fulfilled') return settled.value;
-  console.error('스캔 API 오류:', settled.reason);
+  console.error(`[SCAN:${engineName}] 오류:`, settled.reason?.message ?? settled.reason);
   return PENDING; // API 실패 시 pending 처리
 }
 

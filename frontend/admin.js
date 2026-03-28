@@ -22,22 +22,50 @@ async function loadDemos() {
   }
 }
 
+// ===== 대시보드 통계 =====
+function renderStats(demos) {
+  const today = new Date().toLocaleDateString('en-CA');
+  const todayCount = demos.filter(d => d.createdAt && new Date(d.createdAt).toLocaleDateString('en-CA') === today).length;
+  const totalClicks = demos.reduce((s, d) => s + (d.clickCount ?? 0), 0);
+  const totalReviews = demos.reduce((s, d) => s + (d.reviewCount ?? 0), 0);
+  const totalFeedback = demos.reduce((s, d) => {
+    const fb = d.feedback ?? {};
+    return s + (fb.tried_it ?? 0) + (fb.useful ?? 0) + (fb.needs_work ?? 0);
+  }, 0);
+
+  document.getElementById('s-total').textContent = demos.length;
+  document.getElementById('s-today').textContent = todayCount;
+  document.getElementById('s-clicks').textContent = totalClicks;
+  document.getElementById('s-reviews').textContent = totalReviews;
+  document.getElementById('s-feedback').textContent = totalFeedback;
+
+  // 피처 리퀘스트 수는 별도 API
+  fetch(`${API_BASE}/api/admin/requests`)
+    .then(r => r.json())
+    .then(reqs => { document.getElementById('s-requests').textContent = reqs.length; })
+    .catch(() => { document.getElementById('s-requests').textContent = '?'; });
+}
+
 // ===== 테이블 렌더링 =====
 function renderTable(demos) {
   const tbody = document.getElementById('demo-tbody');
   tbody.innerHTML = '';
 
-  demos.forEach(demo => {
-    const { id, name, url, category, scanResult, createdAt } = demo;
+  renderStats(demos);
+
+  demos.forEach((demo, idx) => {
+    const { id, name, url, category, scanResult, createdAt, clickCount = 0, reviewCount = 0 } = demo;
     const overall = scanResult?.overall ?? 'pending';
     const date = createdAt ? new Date(createdAt).toLocaleDateString('en-CA') : '—';
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${escapeHtml(name)}</td>
-      <td><a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(url)}</a></td>
+      <td style="color:#aaa;font-size:0.8rem">#${idx + 1}</td>
+      <td><a href="/demo/${id}" target="_blank" style="color:#1a1a2e;font-weight:600">${escapeHtml(name)}</a></td>
       <td>${escapeHtml(category ?? 'other')}</td>
       <td>${date}</td>
+      <td style="text-align:center">${clickCount}</td>
+      <td style="text-align:center">${reviewCount}</td>
       <td><span class="badge ${overall}">${overall}</span></td>
       <td>
         <button class="btn-edit" data-id="${id}">수정</button>

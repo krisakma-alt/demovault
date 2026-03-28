@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DemoVault — Admin</title>
-  <link rel="stylesheet" href="style.css?v=20260324" />
+  <link rel="stylesheet" href="style.css?v=20260324c" />
 </head>
 <body>
   <header>
@@ -19,6 +19,16 @@
     <div class="admin-tabs">
       <button class="admin-tab active" data-tab="demos">📋 데모 관리</button>
       <button class="admin-tab"        data-tab="requests">💡 피처 리퀘스트</button>
+    </div>
+
+    <!-- 대시보드 통계 -->
+    <div id="admin-stats" class="admin-stats">
+      <div class="stat-card"><div class="stat-num" id="s-total">—</div><div class="stat-label">총 데모</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-today">—</div><div class="stat-label">오늘 등록</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-clicks">—</div><div class="stat-label">총 클릭</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-reviews">—</div><div class="stat-label">총 리뷰</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-feedback">—</div><div class="stat-label">총 피드백</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-requests">—</div><div class="stat-label">피처 리퀘스트</div></div>
     </div>
 
     <!-- 데모 탭 -->
@@ -36,10 +46,12 @@
         <table id="demo-table">
           <thead>
             <tr>
+              <th>#</th>
               <th>이름</th>
-              <th>URL</th>
               <th>카테고리</th>
               <th>등록일</th>
+              <th>클릭</th>
+              <th>리뷰</th>
               <th>상태</th>
               <th>작업</th>
             </tr>
@@ -71,9 +83,11 @@
       <input type="text" id="edit-name" />
       <label>카테고리</label>
       <select id="edit-category">
-        <option value="productivity">업무도구</option>
-        <option value="marketing">마케팅</option>
-        <option value="ecommerce">쇼핑</option>
+        <option value="image-gen">이미지 생성</option>
+        <option value="text-ai">텍스트 AI</option>
+        <option value="code-ai">코드 AI</option>
+        <option value="voice-ai">음성 AI</option>
+        <option value="video-ai">영상 AI</option>
         <option value="utility">유틸리티</option>
         <option value="other">기타</option>
       </select>
@@ -85,7 +99,7 @@
       </div>
     </div>
   </div>
-  <script src="i18n.js"></script>
-  <script src="admin.js"></script>
+  <script src="i18n.js?v=20260324c"></script>
+  <script src="admin.js?v=20260324c"></script>
 </body>
 </html>

@@ -1,5 +1,44 @@
+# 어드민 COOP 헤더
 /admin
   Cross-Origin-Opener-Policy: unsafe-none
 
 /admin.html
+  Cross-Origin-Opener-Policy: unsafe-none
+
+# 정적 자산 캐시 (캐시 버스팅 ?v= 사용하므로 장기 캐시 가능)
+/*.css
+  Cache-Control: public, max-age=2592000, immutable
+
+/*.js
+  Cache-Control: public, max-age=2592000, immutable
+
+# 이미지
+/*.png
+  Cache-Control: public, max-age=2592000
+
+/*.svg
+  Cache-Control: public, max-age=2592000
+
+/*.ico
+  Cache-Control: public, max-age=2592000
+
+# 폰트
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML — 짧은 캐시 (콘텐츠 갱신 반영)
+/index.html
+  Cache-Control: public, max-age=300, s-maxage=600
+
+/submit.html
+  Cache-Control: public, max-age=300, s-maxage=600
+
+/demo.html
+  Cache-Control: public, max-age=300, s-maxage=600
+
+/request.html
+  Cache-Control: public, max-age=300, s-maxage=600
+
+/admin.html
+  Cache-Control: no-cache
   Cross-Origin-Opener-Policy: unsafe-none

@@ -1,0 +1,35 @@
+name: Weekly Maintenance
+
+on:
+  schedule:
+    # 매주 월요일 09:00 UTC (한국시간 18:00)
+    - cron: '0 9 * * 1'
+  workflow_dispatch: # 수동 실행 가능
+
+jobs:
+  cleanup-dead-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check dead links
+        run: node scripts/cleanup.js
+        timeout-minutes: 15
+
+  seed-new-demos:
+    needs: cleanup-dead-links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Seed new demos from HF Spaces
+        run: node scripts/seed-demos.js
+        timeout-minutes: 15

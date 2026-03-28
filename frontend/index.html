@@ -35,13 +35,25 @@
   }
   </script>
 
-  <link rel="stylesheet" href="style.css?v=20260324b" />
+  <link rel="dns-prefetch" href="https://demovault-worker.krisakma.workers.dev" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css?v=20260328h" />
 </head>
 <body>
   <header>
     <h1>DemoVault</h1>
     <nav>
-      <a href="/compare">Repo vs Repo</a>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-btn" data-i18n="nav.freeTools">Free Tools ▾</button>
+        <div class="nav-dropdown-menu">
+          <a href="https://clickvolt.app/tools/compare" target="_blank" rel="noopener noreferrer">⚔️ Repo vs Repo</a>
+          <a href="https://clickvolt.app/tools/radar" target="_blank" rel="noopener noreferrer">📡 Repo Radar</a>
+          <a href="https://clickvolt.app/tools/deploy-check" target="_blank" rel="noopener noreferrer">✅ Deploy Checker</a>
+          <a href="https://aireply.youngri.org" target="_blank" rel="noopener noreferrer">💬 AIreply</a>
+        </div>
+      </div>
       <a href="/submit" data-i18n="nav.submit">Submit Demo</a>
       <button id="lang-toggle" aria-label="Toggle language">KR / EN</button>
     </nav>
@@ -52,6 +64,29 @@
     <h2 class="hero-title" data-i18n-html="hero.title">내가 만든 AI 데모,<br>세상에 안전하게 공개하기</h2>
     <p class="hero-sub" data-i18n-html="hero.sub">URL만 있으면 등록 끝. 4가지 보안 도구로 자동 검사 후 갤러리에 게시됩니다.<br>방문자는 검사 결과를 확인하고 안심하고 클릭할 수 있어요.</p>
     <a href="/submit" class="hero-btn" data-i18n="hero.btn">내 데모 등록하기 →</a>
+  </section>
+
+  <!-- Powered by 신뢰 로고 -->
+  <section class="trust-logos">
+    <p class="trust-label" data-i18n="trust.label">Powered by</p>
+    <div class="trust-row">
+      <div class="trust-item">
+        <span class="trust-icon">🛡️</span>
+        <span>Google Web Risk</span>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon">🔒</span>
+        <span>Safe Browsing</span>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon">🔍</span>
+        <span>URLScan.io</span>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon">🦠</span>
+        <span>VirusTotal</span>
+      </div>
+    </div>
   </section>
 
   <!-- How it works -->
@@ -75,6 +110,34 @@
     </div>
   </section>
 
+  <!-- Free Tools -->
+  <section class="free-tools">
+    <h2 data-i18n="freeTools.title">Free Tools</h2>
+    <p data-i18n="freeTools.sub">Useful developer tools — 100% free, no sign-up needed.</p>
+    <div class="free-tools-grid">
+      <a href="https://clickvolt.app/tools/compare" target="_blank" rel="noopener noreferrer" class="ft-card">
+        <div class="ft-icon">⚔️</div>
+        <h3>Repo vs Repo</h3>
+        <p data-i18n="freeTools.compare">Compare two GitHub repos side by side — stars, commits, tech stack</p>
+      </a>
+      <a href="https://clickvolt.app/tools/radar" target="_blank" rel="noopener noreferrer" class="ft-card">
+        <div class="ft-icon">📡</div>
+        <h3>Repo Radar</h3>
+        <p data-i18n="freeTools.radar">Discover trending open-source tools by category</p>
+      </a>
+      <a href="https://clickvolt.app/tools/deploy-check" target="_blank" rel="noopener noreferrer" class="ft-card">
+        <div class="ft-icon">✅</div>
+        <h3>Deploy Checker</h3>
+        <p data-i18n="freeTools.deploy">Check if your site is production-ready (SSL, headers, performance)</p>
+      </a>
+      <a href="https://aireply.youngri.org" target="_blank" rel="noopener noreferrer" class="ft-card">
+        <div class="ft-icon">💬</div>
+        <h3>AIreply</h3>
+        <p data-i18n="freeTools.aireply">AI-powered Google review reply generator for businesses</p>
+      </a>
+    </div>
+  </section>
+
   <main>
     <!-- Trending 섹션 -->
     <section id="section-trending" class="featured-section" hidden>
@@ -90,10 +153,13 @@
 
     <!-- 검색바 + 정렬 -->
     <div class="search-sort-bar">
-      <input type="search" id="search-input"
-             data-i18n-placeholder="search.placeholder"
-             placeholder="Search demos by name or description..."
-             autocomplete="off" />
+      <div class="search-wrapper">
+        <input type="search" id="search-input"
+               data-i18n-placeholder="search.placeholder"
+               placeholder="Search demos by name or description..."
+               autocomplete="off" />
+        <div id="recent-searches" class="recent-searches" hidden></div>
+      </div>
       <select id="sort-select" class="sort-select">
         <option value="reviews" data-i18n="sort.reviews">Most Reviewed</option>
         <option value="popular" data-i18n="sort.popular">Most Popular</option>
@@ -130,6 +196,12 @@
       <a href="/submit" data-i18n="nav.submit">Submit Demo</a>
     </div>
 
+    <div id="state-no-results" class="state-box" hidden>
+      <p class="state-icon">🔍</p>
+      <p id="no-results-text" data-i18n="gallery.noResults">No demos found. Try a different search or filter.</p>
+      <button id="clear-search-btn" class="btn-clear-search" data-i18n="gallery.clearSearch">Clear Search</button>
+    </div>
+
     <section id="gallery" aria-label="Demo gallery"></section>
   </main>
 
@@ -151,13 +223,32 @@
   </div>
 
   <footer class="site-footer">
-    <p>© 2026 DemoVault &nbsp;·&nbsp;
-      <a href="/request">💡 Feature Request</a> &nbsp;·&nbsp;
+    <p>&copy; 2026 DemoVault &nbsp;&middot;&nbsp;
+      <a href="/privacy">Privacy Policy</a> &nbsp;&middot;&nbsp;
+      <a href="/terms">Terms of Service</a> &nbsp;&middot;&nbsp;
+      <a href="/request">💡 Feature Request</a> &nbsp;&middot;&nbsp;
       <a href="/submit">Submit a Demo</a>
+    </p>
+    <p class="footer-family" data-i18n="footer.family">Our Services:
+      <a href="https://clickvolt.app" target="_blank" rel="noopener noreferrer">ClickVolt</a> &nbsp;&middot;&nbsp;
+      <a href="https://aireply.youngri.org" target="_blank" rel="noopener noreferrer">AIreply</a> &nbsp;&middot;&nbsp;
+      <a href="https://youngribot-webapp.pages.dev" target="_blank" rel="noopener noreferrer">영리봇</a> &nbsp;&middot;&nbsp;
+      <a href="https://demovault.youngri.org">DemoVault</a>
     </p>
   </footer>
 
-  <script src="i18n.js?v=20260324b"></script>
-  <script src="gallery.js?v=20260324b"></script>
+  <script>
+    // 모바일 드롭다운 토글
+    document.querySelector('.nav-dropdown-btn')?.addEventListener('click', e => {
+      e.currentTarget.closest('.nav-dropdown').classList.toggle('open');
+    });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.nav-dropdown')) {
+        document.querySelector('.nav-dropdown')?.classList.remove('open');
+      }
+    });
+  </script>
+  <script src="/i18n.js?v=20260328h" defer></script>
+  <script src="/gallery.js?v=20260328h" defer></script>
 </body>
 </html>

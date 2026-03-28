@@ -23,6 +23,9 @@ const TRANSLATIONS = {
     'gallery.error':        'Failed to load demos. Is the Worker running?',
     'gallery.retry':        'Retry',
     'gallery.empty':        'No demos yet. Be the first to submit!',
+    'submit.badgeLabel':    'Add this badge to your README:',
+    'submit.copy':          'Copy',
+    'submit.viewDemo':      'View My Demo →',
     'submit.sending':       'Submitting...',
     'submit.success':       '✓ Registered! Redirecting to gallery...',
     'submit.errorGeneric':  'Submission failed. Please try again.',
@@ -52,6 +55,16 @@ const TRANSLATIONS = {
     'cat.ecommerce':        'E-Commerce',
     // 검색
     'search.placeholder':   'Search demos by name or description...',
+    'search.recent':        'Recent',
+    'gallery.noResults':    'No demos found. Try a different search or filter.',
+    'gallery.clearSearch':  'Clear Search',
+    // 등록 단계
+    'submit.step1':         'Info',
+    'submit.step2':         'Details',
+    'submit.step3':         'Submit',
+    'submit.next':          'Next →',
+    'submit.back':          '← Back',
+    'submit.preview':       'Review & Submit',
     // 정렬
     'sort.reviews':         'Most Reviewed',
     'sort.popular':         'Most Popular',
@@ -72,6 +85,24 @@ const TRANSLATIONS = {
     'compare.cta':          'Compare',
     'compare.loading':      'Fetching repository data...',
     'compare.popular':      'Popular Comparisons',
+    // Free Tools
+    'nav.freeTools':        'Free Tools ▾',
+    'freeTools.title':      'Free Tools',
+    'freeTools.sub':        'Useful developer tools — 100% free, no sign-up needed.',
+    'freeTools.compare':    'Compare two GitHub repos side by side — stars, commits, tech stack',
+    'freeTools.radar':      'Discover trending open-source tools by category',
+    'freeTools.deploy':     'Check if your site is production-ready (SSL, headers, performance)',
+    'freeTools.aireply':    'AI-powered Google review reply generator for businesses',
+    // Trust logos
+    'trust.label':          'Powered by',
+    // Submit benefits
+    'benefits.title':       'Why submit to DemoVault?',
+    'benefit.badge':        'Verified Badge',
+    'benefit.badgeDesc':    'Get a safety-verified badge for your README',
+    'benefit.exposure':     'Free Exposure',
+    'benefit.exposureDesc': 'Developers discover your project in our gallery',
+    'benefit.security':     'Security Proof',
+    'benefit.securityDesc': '4-engine scan result builds trust with visitors',
   },
   kr: {
     'nav.submit':           '데모 등록',
@@ -97,6 +128,9 @@ const TRANSLATIONS = {
     'gallery.error':        '데모를 불러오지 못했습니다. Worker가 실행 중인지 확인하세요.',
     'gallery.retry':        '다시 시도',
     'gallery.empty':        '아직 등록된 데모가 없습니다. 첫 번째로 등록해보세요!',
+    'submit.badgeLabel':    'README에 이 뱃지를 추가하세요:',
+    'submit.copy':          '복사',
+    'submit.viewDemo':      '내 데모 보기 →',
     'submit.sending':       '등록 중...',
     'submit.success':       '✓ 등록 완료! 갤러리로 이동합니다...',
     'submit.errorGeneric':  '등록에 실패했습니다. 다시 시도해주세요.',
@@ -126,6 +160,16 @@ const TRANSLATIONS = {
     'cat.ecommerce':        '쇼핑',
     // 검색
     'search.placeholder':   '이름이나 설명으로 검색...',
+    'search.recent':        '최근 검색',
+    'gallery.noResults':    '검색 결과가 없습니다. 다른 검색어나 필터를 시도해보세요.',
+    'gallery.clearSearch':  '검색 초기화',
+    // 등록 단계
+    'submit.step1':         '기본 정보',
+    'submit.step2':         '상세 정보',
+    'submit.step3':         '등록',
+    'submit.next':          '다음 →',
+    'submit.back':          '← 이전',
+    'submit.preview':       '확인 후 등록',
     // 정렬
     'sort.reviews':         '리뷰 많은 순',
     'sort.popular':         '인기순',
@@ -146,6 +190,24 @@ const TRANSLATIONS = {
     'compare.cta':          '비교하기',
     'compare.loading':      '레포지토리 데이터를 가져오는 중...',
     'compare.popular':      '인기 비교',
+    // Free Tools
+    'nav.freeTools':        '무료 도구 ▾',
+    'freeTools.title':      '무료 도구',
+    'freeTools.sub':        '개발자를 위한 유용한 도구 — 100% 무료, 가입 불필요.',
+    'freeTools.compare':    '두 GitHub 레포를 나란히 비교 — 스타, 커밋, 기술 스택',
+    'freeTools.radar':      '카테고리별 트렌딩 오픈소스 도구 발견',
+    'freeTools.deploy':     '사이트가 배포 준비되었는지 확인 (SSL, 헤더, 성능)',
+    'freeTools.aireply':    'AI 기반 구글 리뷰 답변 생성기',
+    // Trust logos
+    'trust.label':          'Powered by',
+    // Submit benefits
+    'benefits.title':       'DemoVault에 등록하면?',
+    'benefit.badge':        '인증 뱃지',
+    'benefit.badgeDesc':    'README에 안전 인증 뱃지를 달 수 있어요',
+    'benefit.exposure':     '무료 노출',
+    'benefit.exposureDesc': '개발자들이 갤러리에서 프로젝트를 발견합니다',
+    'benefit.security':     '보안 증명',
+    'benefit.securityDesc': '4종 검사 결과가 방문자 신뢰를 높여줍니다',
   },
 };
 

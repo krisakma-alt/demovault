@@ -8,45 +8,109 @@
   <meta property="og:title"       content="Submit Your AI Demo — DemoVault" />
   <meta property="og:description" content="Share your AI project with the world. Safety-checked, no account required." />
   <meta property="og:url"         content="https://demovault.youngri.org/submit" />
-  <link rel="stylesheet" href="style.css?v=20260324" />
+  <link rel="stylesheet" href="/style.css?v=20260328h" />
 </head>
 <body>
   <header>
-    <h1><a href="index.html">DemoVault</a></h1>
+    <h1><a href="/">DemoVault</a></h1>
     <button id="lang-toggle">KR / EN</button>
   </header>
 
   <main>
+    <!-- 단계 표시 -->
+    <div class="step-indicator">
+      <div class="step active" data-step="1">
+        <div class="step-number">1</div>
+        <span data-i18n="submit.step1">Info</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" data-step="2">
+        <div class="step-number">2</div>
+        <span data-i18n="submit.step2">Details</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" data-step="3">
+        <div class="step-number">3</div>
+        <span data-i18n="submit.step3">Submit</span>
+      </div>
+    </div>
+
+    <!-- 혜택 섹션 -->
+    <div class="submit-benefits">
+      <h3 data-i18n="benefits.title">Why submit to DemoVault?</h3>
+      <div class="benefits-grid">
+        <div class="benefit-item">
+          <div class="benefit-icon">🏅</div>
+          <div class="benefit-title" data-i18n="benefit.badge">Verified Badge</div>
+          <div class="benefit-desc" data-i18n="benefit.badgeDesc">Get a safety-verified badge for your README</div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon">🚀</div>
+          <div class="benefit-title" data-i18n="benefit.exposure">Free Exposure</div>
+          <div class="benefit-desc" data-i18n="benefit.exposureDesc">Developers discover your project in our gallery</div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon">🛡️</div>
+          <div class="benefit-title" data-i18n="benefit.security">Security Proof</div>
+          <div class="benefit-desc" data-i18n="benefit.securityDesc">4-engine scan result builds trust with visitors</div>
+        </div>
+      </div>
+    </div>
+
     <form id="submit-form">
       <h2 data-i18n="submit.title">Submit Your Demo</h2>
 
-      <label for="name" data-i18n="submit.name">Project Name</label>
-      <input type="text" id="name" name="name" required />
+      <!-- Step 1: 기본 정보 -->
+      <div class="form-step" data-form-step="1">
+        <label for="name" data-i18n="submit.name">Project Name</label>
+        <input type="text" id="name" name="name" required />
 
-      <label for="url" data-i18n="submit.url">Demo URL</label>
-      <input type="url" id="url" name="url" required placeholder="https://" />
+        <label for="url" data-i18n="submit.url">Demo URL</label>
+        <input type="url" id="url" name="url" required placeholder="https://" />
 
-      <label for="category" data-i18n="submit.category">Category</label>
-      <select id="category" name="category" required>
-        <option value="image-gen"   data-i18n="cat.image-gen">Image Gen</option>
-        <option value="text-ai"     data-i18n="cat.text-ai">Text AI</option>
-        <option value="code-ai"     data-i18n="cat.code-ai">Code AI</option>
-        <option value="voice-ai"    data-i18n="cat.voice-ai">Voice AI</option>
-        <option value="video-ai"    data-i18n="cat.video-ai">Video AI</option>
-        <option value="utility"     data-i18n="cat.utility">Utility</option>
-        <option value="other"       data-i18n="cat.other">Other</option>
-      </select>
+        <button type="button" class="btn-next" data-next="2" data-i18n="submit.next">Next →</button>
+      </div>
 
-      <label for="desc" data-i18n="submit.desc">Description</label>
-      <textarea id="desc" name="desc" rows="4"></textarea>
+      <!-- Step 2: 상세 정보 -->
+      <div class="form-step" data-form-step="2" hidden>
+        <label for="category" data-i18n="submit.category">Category</label>
+        <select id="category" name="category" required>
+          <option value="image-gen"   data-i18n="cat.image-gen">Image Gen</option>
+          <option value="text-ai"     data-i18n="cat.text-ai">Text AI</option>
+          <option value="code-ai"     data-i18n="cat.code-ai">Code AI</option>
+          <option value="voice-ai"    data-i18n="cat.voice-ai">Voice AI</option>
+          <option value="video-ai"    data-i18n="cat.video-ai">Video AI</option>
+          <option value="utility"     data-i18n="cat.utility">Utility</option>
+          <option value="other"       data-i18n="cat.other">Other</option>
+        </select>
 
-      <button type="submit" data-i18n="submit.button">Submit &amp; Scan</button>
+        <label for="desc" data-i18n="submit.desc">Description</label>
+        <textarea id="desc" name="desc" rows="4"></textarea>
+
+        <div class="form-step-buttons">
+          <button type="button" class="btn-back" data-back="1" data-i18n="submit.back">← Back</button>
+          <button type="button" class="btn-next" data-next="3" data-i18n="submit.next">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: 확인 & 제출 -->
+      <div class="form-step" data-form-step="3" hidden>
+        <div class="submit-preview">
+          <h3 data-i18n="submit.preview">Review & Submit</h3>
+          <dl id="preview-data"></dl>
+        </div>
+
+        <div class="form-step-buttons">
+          <button type="button" class="btn-back" data-back="2" data-i18n="submit.back">← Back</button>
+          <button type="submit" data-i18n="submit.button">Submit &amp; Scan</button>
+        </div>
+      </div>
     </form>
 
     <div id="result" hidden></div>
   </main>
 
-  <script src="i18n.js"></script>
-  <script src="submit.js"></script>
+  <script src="/i18n.js"></script>
+  <script src="/submit.js"></script>
 </body>
 </html>

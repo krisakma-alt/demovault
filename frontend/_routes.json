@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": [
+    "/style.css*",
+    "/gallery.js*",
+    "/i18n.js*",
+    "/demo.js*",
+    "/submit.js*",
+    "/request.js*",
+    "/admin.js*",
+    "/og.png",
+    "/favicon.ico",
+    "/*.svg",
+    "/*.png"
+  ]
+}

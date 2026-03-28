@@ -9,6 +9,7 @@ const SCAN_PROVIDERS = [
   ['Google Web Risk',  'webRisk'],
   ['Safe Browsing',    'safeBrowsing'],
   ['urlscan.io',       'urlscan'],
+  ['VirusTotal',       'virusTotal'],
 ];
 
 // URL에서 demo ID 추출: /demo/abc123 또는 ?id=abc123
@@ -79,6 +80,29 @@ function renderDemo(demo) {
   document.getElementById('stat-tried').textContent  = fb.tried_it;
   document.getElementById('stat-needs').textContent  = fb.needs_work;
 
+  // 업보트
+  const upvoteBtn = document.getElementById('upvote-btn');
+  const upvoteCountEl = document.getElementById('upvote-count');
+  upvoteCountEl.textContent = fb.useful;
+
+  if (localStorage.getItem(`dv_upvoted_${id}`)) {
+    upvoteBtn.classList.add('voted');
+    upvoteBtn.querySelector('.upvote-label').textContent = 'Upvoted';
+  } else {
+    upvoteBtn.addEventListener('click', async () => {
+      if (localStorage.getItem(`dv_upvoted_${id}`)) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/feedback?id=${id}&type=useful`, { method: 'POST' });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        localStorage.setItem(`dv_upvoted_${id}`, '1');
+        upvoteBtn.classList.add('voted');
+        upvoteBtn.querySelector('.upvote-label').textContent = 'Upvoted';
+        upvoteCountEl.textContent = data.feedback.useful ?? 0;
+      } catch { /* 실패 시 무시 */ }
+    });
+  }
+
   // Visit 버튼
   document.getElementById('visit-btn').addEventListener('click', () => openGateModal(id, url));
 
@@ -99,22 +123,150 @@ function renderDemo(demo) {
     });
   });
 
-  // Pro CTA — tier가 없으면 표시
-  if (!tier || tier === 'free') {
-    const ctaEl = document.getElementById('pro-cta');
-    ctaEl.hidden = false;
-    document.getElementById('pro-btn').addEventListener('click', () => startCheckout(id, 'pro'));
-  }
-
-  // 업그레이드 성공 메시지
-  if (new URLSearchParams(location.search).get('upgraded') === '1') {
-    alert('🎉 Pro로 업그레이드되었습니다! 새로운 기능을 이용해보세요.');
-    history.replaceState({}, '', location.pathname);
-  }
+  // Pro CTA — 현재 비활성 (초기 단계에서는 무료 사용에 집중)
+  // TODO: 유저 베이스 확보 후 활성화
+  // if (!tier || tier === 'free') {
+  //   const ctaEl = document.getElementById('pro-cta');
+  //   ctaEl.hidden = false;
+  //   document.getElementById('pro-btn').addEventListener('click', () => startCheckout(id, 'pro'));
+  // }
 
   // 표시
   document.getElementById('state-loading').hidden = true;
   document.getElementById('demo-detail').hidden   = false;
+
+  // 리뷰 로드 + CAPTCHA 초기화
+  loadReviews(id);
+  loadCaptcha();
+  setupReviewForm(id);
+}
+
+// ===== 리뷰 로드 =====
+async function loadReviews(demoId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/reviews?id=${demoId}`);
+    if (!res.ok) return;
+    const reviews = await res.json();
+    renderReviews(reviews);
+  } catch { /* 실패 시 무시 */ }
+}
+
+function renderReviews(reviews) {
+  const count = document.getElementById('review-count');
+  const list  = document.getElementById('review-list');
+  const empty = document.getElementById('review-empty');
+
+  count.textContent = reviews.length;
+
+  if (!reviews.length) {
+    empty.hidden = false;
+    return;
+  }
+
+  empty.hidden = true;
+  // 기존 리뷰 아이템 제거 (empty는 유지)
+  list.querySelectorAll('.review-item').forEach(el => el.remove());
+
+  reviews.forEach(r => {
+    const date = new Date(r.createdAt).toLocaleDateString('en-CA');
+    const item = document.createElement('div');
+    item.className = 'review-item';
+    item.innerHTML = `
+      <div class="review-item-header">
+        <span class="review-author">${escapeHtml(r.author)}</span>
+        <span class="review-date">${date}</span>
+      </div>
+      <p class="review-text">${escapeHtml(r.text)}</p>
+    `;
+    list.appendChild(item);
+  });
+}
+
+// ===== CAPTCHA =====
+let captchaToken = '';
+
+async function loadCaptcha() {
+  try {
+    const res = await fetch(`${API_BASE}/api/captcha`);
+    const data = await res.json();
+    document.getElementById('captcha-question').textContent = data.question;
+    captchaToken = data.token;
+  } catch {
+    document.getElementById('captcha-question').textContent = 'CAPTCHA 로드 실패';
+  }
+}
+
+// ===== 리뷰 폼 =====
+function setupReviewForm(demoId) {
+  const textarea = document.getElementById('review-text');
+  const charSpan = document.getElementById('review-chars');
+
+  textarea.addEventListener('input', () => {
+    charSpan.textContent = textarea.value.length;
+  });
+
+  document.getElementById('review-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('review-submit-btn');
+    const msg = document.getElementById('review-msg');
+
+    const author = document.getElementById('review-author').value.trim();
+    const text   = textarea.value.trim();
+    const answer = document.getElementById('captcha-answer').value;
+
+    if (!text) return;
+
+    btn.disabled = true;
+    msg.hidden = true;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/reviews?id=${demoId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          author, text,
+          captcha: { token: captchaToken, answer: parseInt(answer, 10) },
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        msg.textContent = data.error || '리뷰 등록 실패';
+        msg.className = 'review-msg error';
+        msg.hidden = false;
+        btn.disabled = false;
+        // CAPTCHA 갱신
+        loadCaptcha();
+        document.getElementById('captcha-answer').value = '';
+        return;
+      }
+
+      msg.textContent = '✓ 리뷰가 등록되었습니다!';
+      msg.className = 'review-msg success';
+      msg.hidden = false;
+
+      // 폼 초기화 + 리뷰 리로드
+      textarea.value = '';
+      charSpan.textContent = '0';
+      document.getElementById('review-author').value = '';
+      document.getElementById('captcha-answer').value = '';
+      loadCaptcha();
+      loadReviews(demoId);
+
+      btn.disabled = false;
+    } catch {
+      msg.textContent = '네트워크 오류';
+      msg.className = 'review-msg error';
+      msg.hidden = false;
+      btn.disabled = false;
+    }
+  });
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // ===== Stripe Checkout =====
@@ -164,7 +316,7 @@ function openGateModal(id, url) {
 
       if (overall === 'safe') {
         result.className   = 'modal-result safe';
-        result.textContent = '✓ 3종 안전 검사 통과';
+        result.textContent = '✓ 4종 안전 검사 통과';
         proceedBtn.hidden  = false;
         proceedBtn.onclick = () => { window.open(url, '_blank', 'noopener,noreferrer'); closeModal(); };
       } else if (overall === 'unsafe') {

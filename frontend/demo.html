@@ -6,7 +6,7 @@
   <!-- 동적 메타태그는 demo.js에서 document.title 등으로 채워짐 -->
   <title>DemoVault</title>
   <meta name="description" content="Safety-checked AI demo on DemoVault." />
-  <link rel="stylesheet" href="style.css?v=20260324" />
+  <link rel="stylesheet" href="/style.css?v=20260328h" />
   <style>
     /* 데모 상세 전용 스타일 */
     .demo-detail { max-width: 680px; margin: 2rem auto; padding: 0 1.5rem; }
@@ -62,8 +62,56 @@
     .back-link     { display: inline-block; color: #888; font-size: 0.85rem; margin-bottom: 1.5rem; text-decoration: none; }
     .back-link:hover { color: #1a1a2e; }
 
+    /* 업보트 섹션 */
+    .upvote-section { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+    .upvote-btn {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 1.4rem; border: 2px solid #e9ecef; border-radius: 10px;
+      background: #fff; cursor: pointer; font-size: 0.95rem; font-weight: 700;
+      color: #555; transition: all 0.2s; font-family: inherit;
+    }
+    .upvote-btn:hover { border-color: #4caf50; color: #4caf50; background: #f0fff4; }
+    .upvote-btn.voted { border-color: #4caf50; color: #4caf50; background: #f0fff4; cursor: default; }
+    .upvote-arrow-big { font-size: 1.1rem; }
+    .upvote-count-big { font-size: 1.4rem; font-weight: 800; color: #1a1a2e; }
+
     /* 상태 */
     .state-box { text-align: center; padding: 3rem 1rem; color: #888; }
+
+    /* 리뷰 섹션 */
+    .reviews-section { margin-bottom: 1.5rem; }
+    .reviews-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+
+    .review-form { display: flex; flex-direction: column; gap: 0.6rem; background: #f8f9fa;
+                   padding: 1rem 1.2rem; border-radius: 10px; margin-bottom: 1rem; }
+    .review-form input, .review-form textarea {
+      padding: 0.55rem 0.8rem; border: 1.5px solid #e9ecef; border-radius: 8px;
+      font-size: 0.88rem; font-family: inherit; }
+    .review-form input:focus, .review-form textarea:focus { outline: none; border-color: #1a1a2e; }
+    .review-form textarea { resize: vertical; min-height: 60px; }
+    .review-char-count { font-size: 0.72rem; color: #aaa; text-align: right; margin-top: -0.4rem; }
+
+    .captcha-box { display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; font-weight: 600; }
+    .captcha-box input { width: 60px; text-align: center; }
+
+    .review-form button[type="submit"] {
+      padding: 0.6rem; background: #1a1a2e; color: #fff; border: none;
+      border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+    .review-form button[type="submit"]:hover { background: #2e2e5e; }
+    .review-form button[type="submit"]:disabled { background: #aaa; cursor: not-allowed; }
+
+    .review-msg { text-align: center; font-size: 0.85rem; padding: 0.5rem; border-radius: 6px; }
+    .review-msg.success { background: #d4edda; color: #155724; }
+    .review-msg.error   { background: #f8d7da; color: #721c24; }
+
+    .review-list { display: flex; flex-direction: column; gap: 0.6rem; }
+    .review-empty { color: #aaa; font-size: 0.88rem; text-align: center; padding: 1rem 0; }
+
+    .review-item { background: #fff; border: 1px solid #e9ecef; border-radius: 10px; padding: 0.8rem 1rem; }
+    .review-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem; }
+    .review-author { font-weight: 700; font-size: 0.85rem; color: #1a1a2e; }
+    .review-date   { font-size: 0.72rem; color: #aaa; }
+    .review-text   { font-size: 0.88rem; color: #444; line-height: 1.55; }
   </style>
 </head>
 <body>
@@ -105,6 +153,15 @@
         <div class="scan-rows" id="d-scan-rows"></div>
       </div>
 
+      <!-- 업보트 -->
+      <div class="upvote-section" id="upvote-section">
+        <button class="upvote-btn" id="upvote-btn" aria-label="Upvote this demo">
+          <span class="upvote-arrow-big">▲</span>
+          <span class="upvote-label">Upvote</span>
+        </button>
+        <span class="upvote-count-big" id="upvote-count">0</span>
+      </div>
+
       <!-- 통계 -->
       <div class="stats-row">
         <div class="stat-box">
@@ -122,6 +179,27 @@
         <div class="stat-box">
           <div class="stat-num" id="stat-needs">—</div>
           <div class="stat-label">🔧 Needs work</div>
+        </div>
+      </div>
+
+      <!-- 리뷰 섹션 -->
+      <div class="reviews-section" id="reviews-section">
+        <h3 class="reviews-title">💬 Reviews (<span id="review-count">0</span>)</h3>
+
+        <form id="review-form" class="review-form">
+          <input type="text" id="review-author" maxlength="50" placeholder="Your name (optional)" />
+          <textarea id="review-text" maxlength="200" rows="2" placeholder="Write a short review..." required></textarea>
+          <div class="review-char-count"><span id="review-chars">0</span> / 200</div>
+          <div class="captcha-box" id="captcha-box">
+            <span id="captcha-question">Loading...</span>
+            <input type="number" id="captcha-answer" placeholder="?" required />
+          </div>
+          <button type="submit" id="review-submit-btn">Post Review</button>
+          <div id="review-msg" class="review-msg" hidden></div>
+        </form>
+
+        <div id="review-list" class="review-list">
+          <p class="review-empty" id="review-empty">No reviews yet. Be the first!</p>
         </div>
       </div>
 
@@ -168,6 +246,6 @@
     </div>
   </div>
 
-  <script src="demo.js"></script>
+  <script src="/demo.js"></script>
 </body>
 </html>

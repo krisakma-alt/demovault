@@ -25,6 +25,10 @@ LEMONSQUEEZY_VARIANT_TEAM = "1439849"
 
 # ===== 로컬 개발 전용 설정 (wrangler dev 실행 시 적용) =====
 # .dev.vars 파일에 실제 키를 넣어두면 로컬에서만 사용됨 (gitignore 필수!)
+# ===== Cron Triggers (자동 재스캔) =====
+[triggers]
+crons = ["0 3 * * sun"]  # 매주 일요일 03:00 UTC (한국시간 12:00)
+
 [dev]
 port            = 8787       # 로컬 서버 포트
 local_protocol  = "http"
