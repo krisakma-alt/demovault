@@ -1562,6 +1562,27 @@ button[type="submit"]:disabled { background: var(--text-muted); cursor: not-allo
 
   /* Featured 섹션 */
   .featured-section { padding: 1rem 0; }
+
+  /* 검색바 모바일 */
+  #search-input { font-size: 16px; } /* iOS 줌 방지 */
+
+  /* 정렬 드롭다운 모바일 */
+  #sort-select { font-size: 16px; min-height: 44px; }
+
+  /* 스크롤 투 탑 모바일 위치 */
+  .scroll-top { bottom: 1.5rem; right: 1.5rem; }
+
+  /* 카드 업보트 모바일 */
+  .card-upvote-display { min-width: 38px; padding: 0.3rem 0.4rem; }
+
+  /* Hero 줄간격 */
+  .hero-sub { font-size: 0.92rem; }
+}
+
+@media (max-width: 380px) {
+  /* 극소형 기기 */
+  header h1 { font-size: 1rem; }
+  .hero-title { font-size: 1.5rem; }
 }
 
 /* ===== Focus Visible (키보드 접근성) ===== */
