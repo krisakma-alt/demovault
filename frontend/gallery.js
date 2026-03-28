@@ -196,6 +196,11 @@ function applyFilter() {
     if (currentSearch || currentFilter !== 'all') {
       showEmpty(false);
       showNoResults(true);
+      // 검색어를 메시지에 포함
+      const noResultsEl = document.getElementById('no-results-text');
+      if (noResultsEl && currentSearch) {
+        noResultsEl.textContent = `No demos found for "${currentSearch}". Try a different keyword.`;
+      }
     } else {
       showNoResults(false);
       showEmpty(true);

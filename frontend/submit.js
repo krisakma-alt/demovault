@@ -21,6 +21,22 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.btn-back').forEach(btn => {
     btn.addEventListener('click', () => goToStep(Number(btn.dataset.back)));
   });
+
+  // URL 실시간 유효성 피드백
+  const urlInput = document.getElementById('url');
+  if (urlInput) {
+    urlInput.addEventListener('input', () => {
+      const val = urlInput.value.trim();
+      if (!val) { urlInput.style.borderColor = ''; return; }
+      try {
+        const u = new URL(val);
+        urlInput.style.borderColor = u.protocol.startsWith('http') ? 'var(--safe-badge)' : 'var(--unsafe-badge)';
+      } catch {
+        urlInput.style.borderColor = 'var(--unsafe-badge)';
+      }
+    });
+    urlInput.addEventListener('blur', () => { urlInput.style.borderColor = ''; });
+  }
 });
 
 // ===== 단계 이동 =====
