@@ -394,10 +394,37 @@ function rerenderBadgesAndButtons() {
   });
 }
 
-function showLoading(show)   { document.getElementById('state-loading').hidden = !show; }
+function showLoading(show) {
+  const el = document.getElementById('state-loading');
+  el.hidden = !show;
+  // 스켈레톤 카드 생성
+  if (show) {
+    const gallery = document.getElementById('gallery');
+    gallery.innerHTML = Array.from({ length: 8 }, () => `
+      <div class="skeleton-card">
+        <div class="skeleton-line title"></div>
+        <div class="skeleton-line desc"></div>
+        <div class="skeleton-line desc-short"></div>
+        <div class="skeleton-line badge"></div>
+      </div>
+    `).join('');
+  }
+}
 function showError(show)     { document.getElementById('state-error').hidden   = !show; }
 function showEmpty(show)     { document.getElementById('state-empty').hidden   = !show; }
 function showNoResults(show) { document.getElementById('state-no-results').hidden = !show; }
+
+// ===== Scroll to Top =====
+(function initScrollTop() {
+  const btn = document.getElementById('scroll-top');
+  if (!btn) return;
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('visible', window.scrollY > 400);
+  }, { passive: true });
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
 
 // ===== 최근 검색어 =====
 function getRecentSearches() {
