@@ -105,6 +105,12 @@ async function loadGallery() {
 
   showLoading(false);
 
+  // Stats 업데이트
+  const statDemos = document.getElementById('stat-demos');
+  const statScanned = document.getElementById('stat-scanned');
+  if (statDemos) statDemos.textContent = allDemos.length;
+  if (statScanned) statScanned.textContent = allDemos.filter(d => d.scanResult).length;
+
   if (!allDemos.length) {
     showEmpty(true);
     return;

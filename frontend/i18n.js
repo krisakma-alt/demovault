@@ -93,6 +93,10 @@ const TRANSLATIONS = {
     'freeTools.radar':      'Discover trending open-source tools by category',
     'freeTools.deploy':     'Check if your site is production-ready (SSL, headers, performance)',
     'freeTools.aireply':    'AI-powered Google review reply generator for businesses',
+    // Stats
+    'stats.demos':          'Demos Listed',
+    'stats.scanned':        'Security Verified',
+    'stats.engines':        'Security Engines',
     // Trust logos
     'trust.label':          'Powered by',
     // Submit benefits
@@ -198,6 +202,10 @@ const TRANSLATIONS = {
     'freeTools.radar':      '카테고리별 트렌딩 오픈소스 도구 발견',
     'freeTools.deploy':     '사이트가 배포 준비되었는지 확인 (SSL, 헤더, 성능)',
     'freeTools.aireply':    'AI 기반 구글 리뷰 답변 생성기',
+    // Stats
+    'stats.demos':          '등록된 데모',
+    'stats.scanned':        '보안 검증 완료',
+    'stats.engines':        '보안 엔진',
     // Trust logos
     'trust.label':          'Powered by',
     // Submit benefits

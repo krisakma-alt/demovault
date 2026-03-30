@@ -1415,6 +1415,46 @@ button[type="submit"]:disabled { background: var(--text-muted); cursor: not-allo
 .recent-item:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
 
 /* ===== Trust Logos ===== */
+/* Stats bar */
+.stats-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+.stat-number {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+.stat-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.stat-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--border);
+}
+@media (max-width: 480px) {
+  .stats-bar { gap: 1rem; }
+  .stat-number { font-size: 1.5rem; }
+  .stat-label { font-size: 0.68rem; }
+}
+
 .trust-logos {
   text-align: center;
   padding: 2rem 1rem 1.5rem;
