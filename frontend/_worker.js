@@ -56,6 +56,11 @@ export default {
       return newRes;
     }
 
+    // /sitemap.xml → Worker API 프록시
+    if (pathname === '/sitemap.xml') {
+      return fetch('https://demovault-worker.krisakma.workers.dev/sitemap.xml');
+    }
+
     // /compare → compare.html
     if (pathname === '/compare') {
       const assetUrl = new URL(request.url);
