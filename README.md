@@ -10,7 +10,7 @@
 
 DemoVault is a curated gallery where developers submit AI demo URLs, which are automatically scanned by **4 security engines** before going live. Visitors can discover demos with full transparency on safety status.
 
-**Live:** [demovault.youngri.org](https://demovault.youngri.org)
+**Live:** [demovault.org](https://demovault.org)
 
 ---
 

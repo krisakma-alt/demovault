@@ -2,7 +2,7 @@
 
 > **AI 데모 갤러리 — 안전 검증 기반 AI 프로젝트 디스커버리 플랫폼**
 >
-> 운영 URL: https://demovault.youngri.org
+> 운영 URL: https://demovault.org
 
 ---
 
@@ -68,7 +68,7 @@ DemoVault는 AI 데모 프로젝트를 등록, 검증, 공유하는 플랫폼이
 | **보안 검사** | Google Web Risk, Safe Browsing, URLScan.io, VirusTotal | URL 안전성 4중 검증 |
 | **결제** | LemonSqueezy | Pro 티어 결제 (현재 비활성) |
 | **인증** | Cloudflare Access | 관리자 대시보드 접근 제어 |
-| **DNS** | Cloudflare | demovault.youngri.org 도메인 관리 |
+| **DNS** | Cloudflare | demovault.org 도메인 관리 |
 
 ---
 
@@ -563,7 +563,7 @@ cd frontend && npx wrangler pages deploy . --project-name demovault --commit-dir
 
 | 도메인 | 서비스 |
 |--------|--------|
-| `demovault.youngri.org` | Cloudflare Pages (프론트엔드) |
+| `demovault.org` | Cloudflare Pages (프론트엔드) |
 | Worker 엔드포인트 | Cloudflare Workers (백엔드 API) |
 
 ---

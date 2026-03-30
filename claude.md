@@ -2,7 +2,7 @@
 
 ## 서비스 개요
 인디 개발자가 AI 도구를 무료로 등록·홍보하는 갤러리. 모든 URL은 4종 보안 엔진으로 자동 검사 후 게시.
-- 사이트: https://demovault.youngri.org
+- 사이트: https://demovault.org
 - 상태: 런칭 완료 (Product Hunt, Reddit, X)
 
 ## 기술 스택

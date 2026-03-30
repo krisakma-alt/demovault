@@ -215,7 +215,7 @@ async function handleFeedback(searchParams, env) {
 // ===== GET /sitemap.xml =====
 async function handleSitemap(env) {
   const { keys } = await env.DEMOS.list();
-  const BASE_URL = 'https://demovault.youngri.org';
+  const BASE_URL = 'https://demovault.org';
 
   const staticUrls = ['/', '/submit', '/request'].map(path => `
   <url>
@@ -353,7 +353,7 @@ async function handleLsCheckout(request, env) {
   const variantId = VARIANT_IDS[plan];
   if (!variantId) return jsonResponse({ error: '올바르지 않은 플랜입니다. pro 또는 team을 선택하세요.' }, 400);
 
-  const BASE = 'https://demovault.youngri.org';
+  const BASE = 'https://demovault.org';
   const res = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
     method: 'POST',
     headers: {

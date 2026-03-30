@@ -8,7 +8,7 @@
 Safety-checked AI tool gallery for indie developers
 
 ## URL
-https://demovault.youngri.org
+https://demovault.org
 
 ## Short Description (200자)
 **EN:** DemoVault is a free gallery where indie developers share their AI tools. Every submitted URL is automatically scanned by Google Web Risk, Safe Browsing, URLScan, and VirusTotal before going live. Users can search, filter by category, and leave reviews. No account needed to submit or browse.

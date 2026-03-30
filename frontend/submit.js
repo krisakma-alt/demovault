@@ -164,7 +164,7 @@ function escapeHtml(str) {
 // ===== 뱃지 코드 표시 =====
 function showBadgeCode(demoId) {
   const BADGE_BASE = 'https://demovault-worker.krisakma.workers.dev';
-  const SITE_BASE = 'https://demovault.youngri.org';
+  const SITE_BASE = 'https://demovault.org';
   const badgeUrl = `${BADGE_BASE}/badge/${demoId}.svg`;
   const demoUrl = `${SITE_BASE}/demo/${demoId}`;
 

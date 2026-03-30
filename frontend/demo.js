@@ -2,7 +2,7 @@
 
 const API_BASE  = 'https://demovault-worker.krisakma.workers.dev';
 const BADGE_URL = id => `${API_BASE}/badge/${id}.svg`;
-const SITE_URL  = 'https://demovault.youngri.org';
+const SITE_URL  = 'https://demovault.org';
 
 const SCAN_ICON = { safe: '✓', unsafe: '✗', pending: '⏳' };
 const SCAN_PROVIDERS = [
