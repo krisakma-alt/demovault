@@ -89,7 +89,8 @@
     .ux-bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
     .ux-bar-label { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 0.72rem; font-weight: 700; color: #333; }
     .analysis-ux-comment { font-size: 0.82rem; color: #555; font-style: italic; margin-top: 0.4rem; }
-    .analysis-pending { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.4rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1.5rem; color: #888; font-size: 0.88rem; }
+    .analysis-pending { align-items: center; gap: 0.75rem; padding: 1rem 1.4rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1.5rem; color: #888; font-size: 0.88rem; }
+    .analysis-pending:not([hidden]) { display: flex; }
     .analysis-pending .spinner { width: 20px; height: 20px; border-width: 2px; }
 
     /* Similar Demos */

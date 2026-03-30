@@ -151,27 +151,33 @@ async function loadAnalysis(demoId) {
 
   try {
     const res = await fetch(`${API_BASE}/api/analysis?id=${demoId}`);
-    if (!res.ok) return;
-    const data = await res.json();
-
-    if (data.status === 'pending' || data.error) {
-      pending.hidden = false;
-      // 분석 실행 요청 + 5초 후 재시도
-      fetch(`${API_BASE}/api/analyze?id=${demoId}`, { method: 'POST' }).catch(() => {});
-      setTimeout(() => {
+    if (res.ok) {
+      const data = await res.json();
+      if (!data.error && data.summary && data.summary !== 'Analysis pending') {
         pending.hidden = true;
-        loadAnalysis(demoId);
-      }, 6000);
-      return;
+        renderAnalysis(data);
+        loadSimilarDemos(demoId);
+        return;
+      }
     }
 
+    // 분석 없거나 에러 → 재분석 요청
+    pending.hidden = false;
+    const analyzeRes = await fetch(`${API_BASE}/api/analyze?id=${demoId}`, { method: 'POST' }).catch(() => null);
+    if (analyzeRes?.ok) {
+      const result = await analyzeRes.json();
+      // POST 응답: 직접 분석 결과 또는 {status:'already_analyzed', analysis:{...}}
+      const analysis = result.analysis || result;
+      if (!analysis.error && analysis.summary) {
+        pending.hidden = true;
+        renderAnalysis(analysis);
+        loadSimilarDemos(demoId);
+        return;
+      }
+    }
     pending.hidden = true;
-    renderAnalysis(data);
-
-    // 유사 데모 로드
-    loadSimilarDemos(demoId);
   } catch {
-    // 분석 실패 시 조용히 무시
+    pending.hidden = true;
   }
 }
 
