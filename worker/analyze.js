@@ -99,7 +99,7 @@ function extractOg(html, prop) {
   return m2 ? m2[1] : null;
 }
 
-// ===== Claude API 호출 (AI Gateway 경유) =====
+// ===== Claude API 호출 (AI Gateway 경유 — OpenAI 호환 형식) =====
 export async function analyzeWithClaude(crawlData, env) {
   if (!env.CLAUDE_API_KEY) {
     throw new Error('CLAUDE_API_KEY not configured');
@@ -122,7 +122,12 @@ Respond with this exact JSON structure:
   "ux_comment": "One-line UX first impression in English"
 }`;
 
-  const res = await fetch(`${AI_GATEWAY_BASE}/anthropic/v1/messages`, {
+  // Anthropic API 직접 호출 (AI Gateway 경유 시 호환 문제 우회)
+  const apiUrl = env.AI_GATEWAY_URL
+    ? `${env.AI_GATEWAY_URL}`
+    : 'https://api.anthropic.com/v1/messages';
+
+  const res = await fetch(apiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
