@@ -75,6 +75,35 @@
     .upvote-arrow-big { font-size: 1.1rem; }
     .upvote-count-big { font-size: 1.4rem; font-weight: 800; color: #1a1a2e; }
 
+    /* AI 분석 섹션 */
+    .analysis-section { background: #f0f8ff; border: 1px solid #d0e8f5; border-radius: 10px; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; }
+    .analysis-section h3 { font-size: 0.95rem; color: #333; margin: 0 0 0.8rem; }
+    .analysis-summary { font-size: 0.95rem; font-weight: 600; color: #1a1a2e; margin-bottom: 0.8rem; }
+    .analysis-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .analysis-label { font-size: 0.78rem; color: #666; min-width: 90px; font-weight: 600; }
+    .analysis-value { font-size: 0.85rem; color: #333; }
+    .analysis-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .analysis-tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; background: rgba(26,26,46,0.08); color: #1a1a2e; }
+    .analysis-tag.tech { background: rgba(59,130,246,0.1); color: #3b82f6; }
+    .ux-score-bar { flex: 1; background: #e9ecef; border-radius: 6px; height: 20px; position: relative; overflow: hidden; max-width: 200px; }
+    .ux-bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
+    .ux-bar-label { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 0.72rem; font-weight: 700; color: #333; }
+    .analysis-ux-comment { font-size: 0.82rem; color: #555; font-style: italic; margin-top: 0.4rem; }
+    .analysis-pending { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.4rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1.5rem; color: #888; font-size: 0.88rem; }
+    .analysis-pending .spinner { width: 20px; height: 20px; border-width: 2px; }
+
+    /* Similar Demos */
+    .similar-section { margin-bottom: 1.5rem; }
+    .similar-section h3 { font-size: 0.95rem; color: #333; margin: 0 0 0.8rem; }
+    .similar-grid { display: flex; flex-direction: column; gap: 0.6rem; }
+    .similar-card { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 10px; padding: 0.8rem 1rem; text-decoration: none; color: inherit; transition: all 0.2s; }
+    .similar-card:hover { border-color: #1a1a2e; background: #f0f0ff; }
+    .similar-name { font-weight: 700; font-size: 0.88rem; color: #1a1a2e; }
+    .similar-summary { font-size: 0.78rem; color: #888; }
+    .similar-badge { font-size: 0.72rem; font-weight: 700; }
+    .similar-badge.safe { color: #4caf50; }
+    .similar-badge.unsafe { color: #f44336; }
+
     /* 상태 */
     .state-box { text-align: center; padding: 3rem 1rem; color: #888; }
 
@@ -153,6 +182,37 @@
         <div class="scan-rows" id="d-scan-rows"></div>
       </div>
 
+      <!-- AI 분석 리포트 -->
+      <div class="analysis-section" id="analysis-section" hidden>
+        <h3>🤖 AI Analysis</h3>
+        <p class="analysis-summary" id="a-summary"></p>
+        <div class="analysis-row">
+          <span class="analysis-label">Categories</span>
+          <div class="analysis-tags" id="a-categories"></div>
+        </div>
+        <div class="analysis-row">
+          <span class="analysis-label">Target Users</span>
+          <span class="analysis-value" id="a-target"></span>
+        </div>
+        <div class="analysis-row">
+          <span class="analysis-label">Tech Stack</span>
+          <div class="analysis-tags" id="a-techstack"></div>
+        </div>
+        <div class="analysis-row">
+          <span class="analysis-label">UX Score</span>
+          <div class="ux-score-bar">
+            <div class="ux-bar-fill" id="a-ux-bar"></div>
+            <span class="ux-bar-label" id="a-ux-score"></span>
+          </div>
+        </div>
+        <p class="analysis-ux-comment" id="a-ux-comment"></p>
+      </div>
+
+      <div class="analysis-pending" id="analysis-pending" hidden>
+        <div class="spinner"></div>
+        <span>AI is analyzing this demo...</span>
+      </div>
+
       <!-- 업보트 -->
       <div class="upvote-section" id="upvote-section">
         <button class="upvote-btn" id="upvote-btn" aria-label="Upvote this demo">
@@ -212,6 +272,12 @@
         <div class="embed-preview" id="badge-preview"></div>
         <div class="embed-code" id="embed-code"></div>
         <button class="copy-btn" id="copy-btn">Copy Code</button>
+      </div>
+
+      <!-- Similar Demos -->
+      <div class="similar-section" id="similar-section" hidden>
+        <h3>🔗 Similar Demos</h3>
+        <div class="similar-grid" id="similar-grid"></div>
       </div>
 
       <!-- Pro CTA (Free 데모에만 표시) -->

@@ -139,6 +139,100 @@ function renderDemo(demo) {
   loadReviews(id);
   loadCaptcha();
   setupReviewForm(id);
+
+  // AI 분석 로드
+  loadAnalysis(id);
+}
+
+// ===== AI 분석 로드 + 렌더링 =====
+async function loadAnalysis(demoId) {
+  const section = document.getElementById('analysis-section');
+  const pending = document.getElementById('analysis-pending');
+
+  try {
+    const res = await fetch(`${API_BASE}/api/analysis?id=${demoId}`);
+    if (!res.ok) return;
+    const data = await res.json();
+
+    if (data.status === 'pending' || data.error) {
+      pending.hidden = false;
+      // 5초 후 재시도 (비동기 분석 완료 대기)
+      setTimeout(() => loadAnalysis(demoId), 5000);
+      return;
+    }
+
+    pending.hidden = true;
+    renderAnalysis(data);
+
+    // 유사 데모 로드
+    loadSimilarDemos(demoId);
+  } catch {
+    // 분석 실패 시 조용히 무시
+  }
+}
+
+function renderAnalysis(analysis) {
+  const section = document.getElementById('analysis-section');
+
+  // 요약
+  document.getElementById('a-summary').textContent = analysis.summary || '';
+
+  // 카테고리 태그
+  const catContainer = document.getElementById('a-categories');
+  catContainer.innerHTML = (analysis.categories || [])
+    .map(c => `<span class="analysis-tag">${escHtml(c)}</span>`)
+    .join('');
+
+  // 대상 유저
+  document.getElementById('a-target').textContent = analysis.target_users || '';
+
+  // 기술 스택 태그
+  const techContainer = document.getElementById('a-techstack');
+  techContainer.innerHTML = (analysis.tech_stack || [])
+    .map(t => `<span class="analysis-tag tech">${escHtml(t)}</span>`)
+    .join('');
+
+  // UX 점수 바
+  const score = analysis.ux_score || 0;
+  const barFill = document.getElementById('a-ux-bar');
+  const barColor = score >= 7 ? '#4caf50' : score >= 4 ? '#ff9800' : '#f44336';
+  barFill.style.width = `${score * 10}%`;
+  barFill.style.background = barColor;
+  document.getElementById('a-ux-score').textContent = `${score}/10`;
+
+  // UX 코멘트
+  document.getElementById('a-ux-comment').textContent = analysis.ux_comment || '';
+
+  section.hidden = false;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ===== 유사 데모 로드 =====
+async function loadSimilarDemos(demoId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/similar?id=${demoId}`);
+    if (!res.ok) return;
+    const demos = await res.json();
+    if (!demos.length) return;
+
+    const grid = document.getElementById('similar-grid');
+    grid.innerHTML = demos.map(d => {
+      const overall = d.scanResult?.overall ?? 'pending';
+      const badgeText = overall === 'safe' ? '✓ Safe' : overall === 'unsafe' ? '✗ Unsafe' : '⏳';
+      return `<a href="/demo/${d.id}" class="similar-card">
+        <div>
+          <div class="similar-name">${escHtml(d.name)}</div>
+          <div class="similar-summary">${escHtml(d.summary || '')}</div>
+        </div>
+        <span class="similar-badge ${overall}">${badgeText}</span>
+      </a>`;
+    }).join('');
+
+    document.getElementById('similar-section').hidden = false;
+  } catch { /* 실패 시 무시 */ }
 }
 
 // ===== 리뷰 로드 =====

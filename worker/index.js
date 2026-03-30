@@ -1,6 +1,7 @@
 // DemoVault — Cloudflare Worker 메인 라우터
 
 import { scanUrl } from './scan.js';
+import { runAnalysis } from './analyze.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -13,7 +14,7 @@ export default {
     const reqId = crypto.randomUUID().slice(0, 8);
 
     try {
-      const response = await route(request, env);
+      const response = await route(request, env, ctx);
       const duration = Date.now() - start;
 
       // 구조화된 요청 로깅 (느린 요청 또는 에러 응답)
@@ -52,11 +53,11 @@ export default {
 };
 
 // ===== 라우터 =====
-async function route(request, env) {
+async function route(request, env, ctx) {
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
 
-  if (pathname === '/api/submit'       && method === 'POST')   return handleSubmit(request, env);
+  if (pathname === '/api/submit'       && method === 'POST')   return handleSubmit(request, env, ctx);
   if (pathname === '/api/demos'        && method === 'GET')    return handleListDemos(env);
   if (pathname === '/api/click'        && method === 'POST')   return handleClick(searchParams, env);
   if (pathname === '/api/feedback'     && method === 'POST')   return handleFeedback(searchParams, env);
@@ -76,6 +77,8 @@ async function route(request, env) {
   if (pathname === '/api/reviews'          && method === 'GET')    return handleGetReviews(searchParams, env);
   if (pathname === '/api/reviews'          && method === 'POST')   return handlePostReview(request, searchParams, env);
   if (pathname === '/api/health'           && method === 'GET')    return handleHealth(env);
+  if (pathname === '/api/analysis'         && method === 'GET')    return handleGetAnalysis(searchParams, env);
+  if (pathname === '/api/similar'          && method === 'GET')    return handleSimilarDemos(searchParams, env);
 
   return jsonResponse({ error: '존재하지 않는 경로입니다.' }, 404);
 }
@@ -130,7 +133,7 @@ async function handleAdminUpdate(request, searchParams, env) {
 }
 
 // ===== 기존 핸들러 (변경 없음) =====
-async function handleSubmit(request, env) {
+async function handleSubmit(request, env, ctx) {
   let body;
   try {
     body = await request.json();
@@ -155,6 +158,11 @@ async function handleSubmit(request, env) {
   const id = crypto.randomUUID();
   const demo = { id, name, url: demoUrl, category, desc, scanResult, createdAt: Date.now() };
   await env.DEMOS.put(id, JSON.stringify(demo));
+
+  // AI 분석 비동기 실행 (사용자는 즉시 결과 받음)
+  if (ctx && env.CLAUDE_API_KEY) {
+    ctx.waitUntil(runAnalysis(id, demoUrl, env));
+  }
 
   return jsonResponse({ id, scanResult }, 201);
 }
@@ -660,6 +668,63 @@ async function hashString(str) {
   const data = new TextEncoder().encode(str);
   const buf = await crypto.subtle.digest('SHA-256', data);
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
+}
+
+// ===== GET /api/analysis?id= =====
+async function handleGetAnalysis(searchParams, env) {
+  const id = searchParams.get('id');
+  if (!id) return jsonResponse({ error: 'id 파라미터가 필요합니다.' }, 400);
+
+  const raw = await env.DEMOS.get(`analysis_${id}`);
+  if (!raw) return jsonResponse({ status: 'pending' });
+
+  return jsonResponse(JSON.parse(raw), 200, { 'Cache-Control': 'public, max-age=60, s-maxage=120' });
+}
+
+// ===== GET /api/similar?id= =====
+// 카테고리 매칭으로 유사 데모 추천 (Claude 비용 $0)
+async function handleSimilarDemos(searchParams, env) {
+  const id = searchParams.get('id');
+  if (!id) return jsonResponse({ error: 'id 파라미터가 필요합니다.' }, 400);
+
+  // 현재 데모 분석 데이터 가져오기
+  const analysisRaw = await env.DEMOS.get(`analysis_${id}`);
+  if (!analysisRaw) return jsonResponse([]);
+
+  const analysis = JSON.parse(analysisRaw);
+  const categories = analysis.categories || [];
+  if (!categories.length) return jsonResponse([]);
+
+  // 전체 데모 + 분석 데이터 조회
+  const { keys } = await env.DEMOS.list();
+  const demoKeys = keys.filter(({ name }) =>
+    !name.startsWith('req_') && !name.startsWith('reviews_') &&
+    !name.startsWith('rl_') && !name.startsWith('analysis_') && name !== id
+  );
+
+  const similar = [];
+  for (const { name: key } of demoKeys) {
+    if (similar.length >= 3) break;
+
+    const aRaw = await env.DEMOS.get(`analysis_${key}`);
+    if (!aRaw) continue;
+
+    const a = JSON.parse(aRaw);
+    const overlap = (a.categories || []).some(c => categories.includes(c));
+    if (!overlap) continue;
+
+    const dRaw = await env.DEMOS.get(key);
+    if (!dRaw) continue;
+    const demo = JSON.parse(dRaw);
+
+    similar.push({
+      id: demo.id, name: demo.name, url: demo.url,
+      summary: a.summary, categories: a.categories,
+      scanResult: demo.scanResult,
+    });
+  }
+
+  return jsonResponse(similar, 200, { 'Cache-Control': 'public, max-age=120, s-maxage=300' });
 }
 
 // ===== GET /api/health =====
