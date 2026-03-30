@@ -9,12 +9,14 @@ const MAX_BODY_LENGTH = 3000;
 export async function runAnalysis(demoId, url, env) {
   try {
     const crawlData = await crawlUrl(url);
+    console.log(JSON.stringify({ type: 'crawl_done', demoId, title: crawlData.title, bodyLen: crawlData.body_text?.length }));
+
     const analysis = await analyzeWithClaude(crawlData, env);
     analysis.analyzed_at = new Date().toISOString();
     await env.DEMOS.put(`analysis_${demoId}`, JSON.stringify(analysis));
     console.log(JSON.stringify({ type: 'analysis', demoId, summary: analysis.summary }));
   } catch (err) {
-    console.error(JSON.stringify({ type: 'analysis_error', demoId, error: err.message }));
+    console.error(JSON.stringify({ type: 'analysis_error', demoId, error: err.message, stack: err.stack?.split('\n')[0] }));
     // 실패 시 기본값 저장
     await env.DEMOS.put(`analysis_${demoId}`, JSON.stringify({
       summary: 'Analysis pending',
@@ -25,6 +27,7 @@ export async function runAnalysis(demoId, url, env) {
       ux_comment: 'Analysis failed — will retry on next scan.',
       analyzed_at: new Date().toISOString(),
       error: true,
+      error_msg: err.message,
     }));
   }
 }
@@ -122,10 +125,9 @@ Respond with this exact JSON structure:
   "ux_comment": "One-line UX first impression in English"
 }`;
 
-  // Anthropic API 직접 호출 (AI Gateway 경유 시 호환 문제 우회)
-  const apiUrl = env.AI_GATEWAY_URL
-    ? `${env.AI_GATEWAY_URL}`
-    : 'https://api.anthropic.com/v1/messages';
+  // Anthropic API 직접 호출
+  const apiUrl = env.AI_GATEWAY_URL || 'https://api.anthropic.com/v1/messages';
+  console.log(JSON.stringify({ type: 'claude_call', apiUrl, model: CLAUDE_MODEL, keyPrefix: env.CLAUDE_API_KEY?.slice(0, 10) }));
 
   const res = await fetch(apiUrl, {
     method: 'POST',
@@ -142,8 +144,9 @@ Respond with this exact JSON structure:
   });
 
   if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Claude API error: ${res.status} — ${errText.slice(0, 200)}`);
+    let errText = '';
+    try { errText = await res.text(); } catch {}
+    throw new Error(`Claude API error: ${res.status} — ${errText.slice(0, 500)}`);
   }
 
   const data = await res.json();

@@ -78,6 +78,7 @@ async function route(request, env, ctx) {
   if (pathname === '/api/reviews'          && method === 'POST')   return handlePostReview(request, searchParams, env);
   if (pathname === '/api/health'           && method === 'GET')    return handleHealth(env);
   if (pathname === '/api/analysis'         && method === 'GET')    return handleGetAnalysis(searchParams, env);
+  if (pathname === '/api/analyze'          && method === 'POST')   return handleRunAnalysis(searchParams, env);
   if (pathname === '/api/similar'          && method === 'GET')    return handleSimilarDemos(searchParams, env);
 
   return jsonResponse({ error: '존재하지 않는 경로입니다.' }, 404);
@@ -158,11 +159,6 @@ async function handleSubmit(request, env, ctx) {
   const id = crypto.randomUUID();
   const demo = { id, name, url: demoUrl, category, desc, scanResult, createdAt: Date.now() };
   await env.DEMOS.put(id, JSON.stringify(demo));
-
-  // AI 분석 비동기 실행 (사용자는 즉시 결과 받음)
-  if (ctx && env.CLAUDE_API_KEY) {
-    ctx.waitUntil(runAnalysis(id, demoUrl, env));
-  }
 
   return jsonResponse({ id, scanResult }, 201);
 }
@@ -679,6 +675,29 @@ async function handleGetAnalysis(searchParams, env) {
   if (!raw) return jsonResponse({ status: 'pending' });
 
   return jsonResponse(JSON.parse(raw), 200, { 'Cache-Control': 'public, max-age=60, s-maxage=120' });
+}
+
+// ===== POST /api/analyze?id= =====
+// 분석을 별도 요청으로 실행 (서브리퀘스트 제한 우회)
+async function handleRunAnalysis(searchParams, env) {
+  const id = searchParams.get('id');
+  if (!id) return jsonResponse({ error: 'id 파라미터가 필요합니다.' }, 400);
+
+  const raw = await env.DEMOS.get(id);
+  if (!raw) return jsonResponse({ error: '해당 데모를 찾을 수 없습니다.' }, 404);
+
+  // 이미 분석된 경우 스킵
+  const existingAnalysis = await env.DEMOS.get(`analysis_${id}`);
+  if (existingAnalysis) {
+    const parsed = JSON.parse(existingAnalysis);
+    if (!parsed.error) return jsonResponse({ status: 'already_analyzed', analysis: parsed });
+  }
+
+  const demo = JSON.parse(raw);
+  await runAnalysis(id, demo.url, env);
+
+  const result = await env.DEMOS.get(`analysis_${id}`);
+  return jsonResponse(result ? JSON.parse(result) : { status: 'pending' });
 }
 
 // ===== GET /api/similar?id= =====

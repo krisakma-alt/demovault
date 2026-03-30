@@ -156,8 +156,12 @@ async function loadAnalysis(demoId) {
 
     if (data.status === 'pending' || data.error) {
       pending.hidden = false;
-      // 5초 후 재시도 (비동기 분석 완료 대기)
-      setTimeout(() => loadAnalysis(demoId), 5000);
+      // 분석 실행 요청 + 5초 후 재시도
+      fetch(`${API_BASE}/api/analyze?id=${demoId}`, { method: 'POST' }).catch(() => {});
+      setTimeout(() => {
+        pending.hidden = true;
+        loadAnalysis(demoId);
+      }, 6000);
       return;
     }
 
