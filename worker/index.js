@@ -217,10 +217,16 @@ async function handleSitemap(env) {
   const { keys } = await env.DEMOS.list();
   const BASE_URL = 'https://demovault.org';
 
-  const staticUrls = ['/', '/submit', '/request'].map(path => `
+  const staticPages = [
+    { path: '/',        changefreq: 'daily',  priority: '1.0' },
+    { path: '/submit',  changefreq: 'daily',  priority: '0.8' },
+    { path: '/request', changefreq: 'weekly', priority: '0.5' },
+  ];
+  const staticUrls = staticPages.map(({ path, changefreq, priority }) => `
   <url>
     <loc>${BASE_URL}${path}</loc>
-    <changefreq>daily</changefreq>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
   </url>`).join('');
 
   // req_ prefix 제외한 데모 개별 페이지
@@ -229,6 +235,7 @@ async function handleSitemap(env) {
   <url>
     <loc>${BASE_URL}/demo/${id}</loc>
     <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>`).join('');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
