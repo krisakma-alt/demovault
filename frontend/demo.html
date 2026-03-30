@@ -76,20 +76,20 @@
     .upvote-count-big { font-size: 1.4rem; font-weight: 800; color: #1a1a2e; }
 
     /* AI 분석 섹션 */
-    .analysis-section { background: #f0f8ff; border: 1px solid #d0e8f5; border-radius: 10px; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; }
-    .analysis-section h3 { font-size: 0.95rem; color: #333; margin: 0 0 0.8rem; }
-    .analysis-summary { font-size: 0.95rem; font-weight: 600; color: #1a1a2e; margin-bottom: 0.8rem; }
+    .analysis-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; }
+    .analysis-section h3 { font-size: 0.95rem; color: var(--text-primary); margin: 0 0 0.8rem; }
+    .analysis-summary { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.8rem; }
     .analysis-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
-    .analysis-label { font-size: 0.78rem; color: #666; min-width: 90px; font-weight: 600; }
-    .analysis-value { font-size: 0.85rem; color: #333; }
+    .analysis-label { font-size: 0.78rem; color: var(--text-muted); min-width: 90px; font-weight: 600; }
+    .analysis-value { font-size: 0.85rem; color: var(--text-secondary); }
     .analysis-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-    .analysis-tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; background: rgba(26,26,46,0.08); color: #1a1a2e; }
-    .analysis-tag.tech { background: rgba(59,130,246,0.1); color: #3b82f6; }
-    .ux-score-bar { flex: 1; background: #e9ecef; border-radius: 6px; height: 20px; position: relative; overflow: hidden; max-width: 200px; }
+    .analysis-tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; background: rgba(99,102,241,0.15); color: #818cf8; }
+    .analysis-tag.tech { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .ux-score-bar { flex: 1; background: var(--bg-input); border-radius: 6px; height: 20px; position: relative; overflow: hidden; max-width: 200px; }
     .ux-bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
-    .ux-bar-label { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 0.72rem; font-weight: 700; color: #333; }
-    .analysis-ux-comment { font-size: 0.82rem; color: #555; font-style: italic; margin-top: 0.4rem; }
-    .analysis-pending { align-items: center; gap: 0.75rem; padding: 1rem 1.4rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1.5rem; color: #888; font-size: 0.88rem; }
+    .ux-bar-label { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 0.72rem; font-weight: 700; color: var(--text-primary); }
+    .analysis-ux-comment { font-size: 0.82rem; color: var(--text-secondary); font-style: italic; margin-top: 0.4rem; }
+    .analysis-pending { align-items: center; gap: 0.75rem; padding: 1rem 1.4rem; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.88rem; }
     .analysis-pending:not([hidden]) { display: flex; }
     .analysis-pending .spinner { width: 20px; height: 20px; border-width: 2px; }
 
