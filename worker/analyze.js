@@ -102,12 +102,8 @@ function extractOg(html, prop) {
   return m2 ? m2[1] : null;
 }
 
-// ===== Claude API 호출 (AI Gateway 경유 — OpenAI 호환 형식) =====
+// ===== Claude API 호출 (AI Gateway Provider Keys 사용) =====
 export async function analyzeWithClaude(crawlData, env) {
-  if (!env.CLAUDE_API_KEY) {
-    throw new Error('CLAUDE_API_KEY not configured');
-  }
-
   const prompt = `Analyze this AI demo and respond ONLY with JSON, no other text.
 
 URL: ${crawlData.url}
@@ -125,9 +121,12 @@ Respond with this exact JSON structure:
   "ux_comment": "One-line UX first impression in English"
 }`;
 
-  // Anthropic API 직접 호출
-  const apiUrl = env.AI_GATEWAY_URL || 'https://api.anthropic.com/v1/messages';
-  console.log(JSON.stringify({ type: 'claude_call', apiUrl, model: CLAUDE_MODEL, keyPrefix: env.CLAUDE_API_KEY?.slice(0, 10) }));
+  if (!env.CLAUDE_API_KEY) {
+    throw new Error('CLAUDE_API_KEY not configured');
+  }
+
+  // AI Gateway 경유 + x-api-key 직접 전달
+  const apiUrl = `${AI_GATEWAY_BASE}/anthropic/v1/messages`;
 
   const res = await fetch(apiUrl, {
     method: 'POST',
@@ -143,13 +142,13 @@ Respond with this exact JSON structure:
     }),
   });
 
+  const rawText = await res.text();
+
   if (!res.ok) {
-    let errText = '';
-    try { errText = await res.text(); } catch {}
-    throw new Error(`Claude API error: ${res.status} — ${errText.slice(0, 500)}`);
+    throw new Error(`Claude API error: ${res.status} — ${rawText.slice(0, 500)}`);
   }
 
-  const data = await res.json();
+  const data = JSON.parse(rawText);
   const text = data.content?.[0]?.text ?? '';
 
   // JSON 추출 (코드 블록 안에 있을 수도 있음)
