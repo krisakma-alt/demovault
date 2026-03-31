@@ -32,4 +32,4 @@ jobs:
 
       - name: Seed new demos from HF Spaces
         run: node scripts/seed-demos.js
-        timeout-minutes: 15
+        timeout-minutes: 45
